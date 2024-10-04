@@ -12,22 +12,22 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
 
     @FXML
-    private static TextField nameField;
+    private TextField nameField;
 
     @FXML
-    private static TextField ipField;
+    private TextField ipField;
 
     @FXML
-    private static TextField portField;
+    private TextField portField;
 
     @FXML
-    private static Button cancelButton;
+    private Button cancelButton;
 
     @FXML
-    private static Button acceptButton;
+    private Button acceptButton;
 
     @Override
-    public void initialize(URL arg0, ResourceBundle arg1) {
-        throw new UnsupportedOperationException("Unimplemented method 'initialize'");
+    public void initialize(URL location, ResourceBundle resources) {
+
     }
 }
