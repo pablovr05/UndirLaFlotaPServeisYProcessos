@@ -13,6 +13,4 @@ public class Controller implements Initializable {
     public void initialize(URL arg0, ResourceBundle arg1) {
         throw new UnsupportedOperationException("Unimplemented method 'initialize'");
     }
-
-
 }
