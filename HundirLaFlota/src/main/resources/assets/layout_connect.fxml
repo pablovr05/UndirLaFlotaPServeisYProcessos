@@ -3,12 +3,30 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.Main">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.Main">
    <children>
-      <TextField fx:id="nameField" layoutX="318.0" layoutY="315.0" promptText="Introduce un nombre:" />
-      <TextField fx:id="ipField" layoutX="318.0" layoutY="222.0" promptText="Introduce la IP del servidor:" />
-      <TextField fx:id="portField" layoutX="318.0" layoutY="155.0" promptText="Introduce el puerto del servidor:" />
+      <TextField fx:id="nameField" layoutX="119.0" layoutY="226.0" promptText="Introduce un nombre:" AnchorPane.topAnchor="220.0" />
+      <TextField fx:id="ipField" layoutX="119.0" layoutY="98.0" promptText="Introduce la IP del servidor:" AnchorPane.topAnchor="100.0" />
+      <TextField fx:id="portField" layoutX="121.0" layoutY="167.0" promptText="Introduce el puerto del servidor:" AnchorPane.topAnchor="160.0" />
+      <Button fx:id="cancelButton" layoutX="247.0" layoutY="292.0" mnemonicParsing="false" text="Cancelar" />
+      <Button fx:id="acceptButton" layoutX="88.0" layoutY="292.0" mnemonicParsing="false" text="Aceptar" />
+      <Text layoutX="154.0" layoutY="93.0" strokeType="OUTSIDE" strokeWidth="0.0" text="IP Servidor" AnchorPane.topAnchor="75.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text layoutX="169.0" layoutY="153.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Puerto:" AnchorPane.topAnchor="135.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text layoutX="162.0" layoutY="219.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre:" AnchorPane.topAnchor="195.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
    </children>
 </AnchorPane>
