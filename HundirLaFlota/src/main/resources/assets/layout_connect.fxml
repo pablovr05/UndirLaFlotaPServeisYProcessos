@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.Main">
+   <children>
+      <TextField fx:id="nameField" layoutX="318.0" layoutY="315.0" promptText="Introduce un nombre:" />
+      <TextField fx:id="ipField" layoutX="318.0" layoutY="222.0" promptText="Introduce la IP del servidor:" />
+      <TextField fx:id="portField" layoutX="318.0" layoutY="155.0" promptText="Introduce el puerto del servidor:" />
+   </children>
+</AnchorPane>
