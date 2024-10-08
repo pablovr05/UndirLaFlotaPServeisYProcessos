@@ -18,7 +18,7 @@ public class Main extends Application {
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.setTitle("JavaFX App");
         stage.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
         stage.show();
