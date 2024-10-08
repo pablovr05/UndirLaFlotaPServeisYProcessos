@@ -50,7 +50,6 @@ public class Controller implements Initializable {
     }
 
     private void establecerConexión() {
-        
         if (!nameField.getText().isEmpty() && !ipField.getText().isEmpty() && !portField.getText().isEmpty()) {
             try {
                 Socket socket = new Socket(ipField.getText(), Integer.parseInt(portField.getText()));
