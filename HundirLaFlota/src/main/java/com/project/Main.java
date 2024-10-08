@@ -19,15 +19,13 @@ public class Main extends Application {
 
         stage.setScene(scene);
         stage.setResizable(false);
-        stage.setTitle("Undir la flota");
-        Image icon = new Image("file:icons/UndirLaFlotaLogo.png");
-        stage.getIcons().add(icon);
+        stage.setTitle("JavaFX App");
+        stage.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
         stage.show();
 
         // Afegeix una icona només si no és un Mac
         if (!System.getProperty("os.name").contains("Mac")) {
-            icon = new Image("file:icons/UndirLaFlotaLogo.png");
-            stage.getIcons().add(icon);
+            stage.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
         }
     }
 
