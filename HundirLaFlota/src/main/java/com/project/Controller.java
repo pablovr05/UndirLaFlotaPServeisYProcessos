@@ -33,13 +33,13 @@ public class Controller implements Initializable {
     private Button acceptButton;
 
     @FXML
-    private void acceptButton(ActionEvent event) {
+    private void acceptButtonAction(ActionEvent event) {
         System.out.println("Se pultó el botón aceptar");
         establecerConexión();
     }
 
     @FXML
-    private void cancelButton(ActionEvent event) {
+    private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
 
     }
