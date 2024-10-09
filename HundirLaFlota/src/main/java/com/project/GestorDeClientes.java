@@ -13,22 +13,23 @@ public class GestorDeClientes implements Runnable {
 
     @Override
     public void run() {
-        try {
-
+        try (
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-
-            output.println("Conexión establecida");
-
-            System.out.println(3);
+        ) {
 
             String mensaje;
+            output.println("Bienvenido al servidor. Escribe 'salir' para desconectar.");
+
             while ((mensaje = input.readLine()) != null) {
                 System.out.println("Mensaje del cliente: " + mensaje);
-                // Aquí puedes hacer lo que necesites con el mensaje
+                if (mensaje.equalsIgnoreCase("salir")) {
+                    output.println("Desconectando...");
+                    break;
+                }
+                // Responder al cliente
+                output.println("Servidor recibió: " + mensaje);
             }
-
-            System.out.println(4);
 
         } catch (IOException e) {
             e.printStackTrace();
