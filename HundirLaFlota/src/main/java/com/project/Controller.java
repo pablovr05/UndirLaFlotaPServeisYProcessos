@@ -33,13 +33,13 @@ public class Controller implements Initializable {
     private Button acceptButton;
 
     @FXML
-    private void acceptButtonAction(ActionEvent event) {
+    private void acceptButton(ActionEvent event) {
         System.out.println("Se pultó el botón aceptar");
         establecerConexión();
     }
 
     @FXML
-    private void cancelButtonAction(ActionEvent event) {
+    private void cancelButton(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
 
     }
@@ -52,13 +52,21 @@ public class Controller implements Initializable {
     private void establecerConexión() {
         if (!nameField.getText().isEmpty() && !ipField.getText().isEmpty() && !portField.getText().isEmpty()) {
             try {
-                Socket socket = new Socket(ipField.getText(), Integer.parseInt(portField.getText()));
-    
+                Socket socket = new Socket("localhost", 12345);
+                // Crear fluxos per llegir i escriure dades
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-    
+
+                // Enviar missatge al servidor
                 output.println("Hola des del client!");
-    
+
+                // Llegir resposta del servidor
+                String respostaServidor = input.readLine();
+                System.out.println("\n---------------------------------------------");
+                System.out.println("Resposta del servidor: " + respostaServidor);
+                System.out.println("---------------------------------------------\n");
+
+                // Tancar connexions
                 input.close();
                 output.close();
                 socket.close();
