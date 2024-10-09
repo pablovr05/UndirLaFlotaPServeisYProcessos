@@ -5,14 +5,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.URL;
 import java.util.ResourceBundle;
+import java.io.*;
+import java.net.*;
 
 
 public class Controller implements Initializable {
@@ -33,13 +28,13 @@ public class Controller implements Initializable {
     private Button acceptButton;
 
     @FXML
-    private void acceptButton(ActionEvent event) {
+    private void acceptButtonAction(ActionEvent event) {
         System.out.println("Se pultó el botón aceptar");
         establecerConexión();
     }
 
     @FXML
-    private void cancelButton(ActionEvent event) {
+    private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
 
     }
@@ -51,25 +46,14 @@ public class Controller implements Initializable {
 
     private void establecerConexión() {
         if (!nameField.getText().isEmpty() && !ipField.getText().isEmpty() && !portField.getText().isEmpty()) {
-            try {
+            try (
+            Socket socket = new Socket(ipField.getText(), Integer.valueOf(portField.getText()));
+            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
+            ){
                 Socket socket = new Socket("localhost", 12345);
-                // Crear fluxos per llegir i escriure dades
-                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                new Thread(new GestorDeClientes(socket)).start();
 
-                // Enviar missatge al servidor
-                output.println("Hola des del client!");
-
-                // Llegir resposta del servidor
-                String respostaServidor = input.readLine();
-                System.out.println("\n---------------------------------------------");
-                System.out.println("Resposta del servidor: " + respostaServidor);
-                System.out.println("---------------------------------------------\n");
-
-                // Tancar connexions
-                input.close();
-                output.close();
-                socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

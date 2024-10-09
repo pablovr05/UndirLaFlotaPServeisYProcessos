@@ -3,32 +3,26 @@ package com.project;
 import java.io.*;
 import java.net.*;
 
+import java.util.ArrayList;
+
 public class Server {
+
+    private static final int port = 12345;
+    public static ArrayList<Socket> currentServerUsers = new ArrayList<Socket>();
     public static void main(String[] args) {
-        try {
-            // Crear socket del servidor en el port 12345
-            ServerSocket servidorSocket = new ServerSocket(12345);
+        System.out.println("Esperando conexiones...");
+        try (ServerSocket servidorSocket = new ServerSocket(port)) {
+            while (true) {
 
-            Socket socket = servidorSocket.accept();
-            System.out.println("Client connectat!");
+                Socket socket = servidorSocket.accept();
+                System.out.println("Client connectat!");
 
-            // Crear fluxos per llegir i escriure dades
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-
-            // Llegir missatge del client
-            String missatgeClient = input.readLine();
-            System.out.println("Missatge del client: " + missatgeClient);
-
-            // Respondre al client
-            output.println("Hola des del servidor!");
-
-            // Tancar connexions
-            input.close();
-            output.close();
-            socket.close();
-            servidorSocket.close();
-            System.out.println("---------------------------------------------\n");
+                synchronized (currentServerUsers) {
+                    currentServerUsers.add(socket);
+                }
+                
+                new Thread(new GestorDeClientes(socket)).start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
