@@ -23,7 +23,7 @@ public class Controller implements Initializable {
     private TextField portField;
 
     @FXML
-    private Button cancelButton, acceptButton, addPlayer;
+    private Button cancelButton, acceptButton, addPlayer, nextLy;
 
     @FXML
     private VBox playerList;
@@ -33,6 +33,9 @@ public class Controller implements Initializable {
         addPlayer.setOnAction(event -> {
             Text player = new Text("Player");
             playerList.getChildren().add(player);
+        });
+        nextLy.setOnAction(event -> {
+            UtilsViews.setView("ViewPlaceGrid");
         });
     }
 }
