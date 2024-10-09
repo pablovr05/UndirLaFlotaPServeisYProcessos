@@ -14,13 +14,12 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
 
         // Carrega la vista inicial des del fitxer FXML
-        //Parent root = FXMLLoader.load(getClass().getResource("/assets/layout_shipPlacement_canva.fxml"));
         UtilsViews.parentContainer.setStyle("-fx-font: 14 arial;");
         UtilsViews.addView(getClass(), "ViewPlaceGrid", "/assets/layout_shipPlacement_canva.fxml");
         UtilsViews.addView(getClass(), "ViewConnect", "/assets/layout_connect.fxml");
         UtilsViews.addView(getClass(), "ViewWaiting", "/assets/layout_serverPlayers.fxml");
 
-        UtilsViews.setView("ViewWaiting");
+        UtilsViews.setView("ViewPlaceGrid");
         Scene scene = new Scene(UtilsViews.parentContainer);
 
         stage.setScene(scene);
