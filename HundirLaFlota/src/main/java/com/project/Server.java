@@ -26,7 +26,7 @@ public class Server {
 
                 synchronized (currentServerUsers) {
                     currentServerUsers.add(socket);
-                    pool.execute(new GestorDeClientes(socket));
+                    pool.execute(new ClientHandler(socket));
                 }
             }
         } catch (IOException e) {

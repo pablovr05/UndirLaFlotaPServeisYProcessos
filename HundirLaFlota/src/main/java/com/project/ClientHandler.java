@@ -3,11 +3,11 @@ package com.project;
 import java.io.*;
 import java.net.*;
 
-public class GestorDeClientes implements Runnable {
+public class ClientHandler implements Runnable {
     
     private Socket socket;
 
-    public GestorDeClientes(Socket socket) {
+    public ClientHandler(Socket socket) {
         this.socket = socket;
     }
 
@@ -48,6 +48,6 @@ public class GestorDeClientes implements Runnable {
             }
         } 
     }
-}
+} 
 
     
