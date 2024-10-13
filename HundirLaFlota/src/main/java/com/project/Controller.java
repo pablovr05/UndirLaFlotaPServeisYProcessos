@@ -51,26 +51,10 @@ public class Controller implements Initializable {
             BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
             ){
-                String[] mensajes = {
-                    "Hola, servidor.",
-                    "¿Cómo estás?",
-                    "Aquí un cliente enviando mensajes automáticos.",
-                    "Mensaje final."
-                };
-    
-                for (String mensaje : mensajes) {
-                    // Enviar el mensaje al servidor
-                    System.out.println("Tú: " + mensaje);
-                    salida.println(mensaje);
-    
-                    // Leer la respuesta del servidor
-                    String respuesta = entrada.readLine();
-                    System.out.println("Servidor: " + respuesta);
-                }
-    
-                // Enviar el mensaje de desconexión
-                salida.println("salir");
-                System.out.println("Cliente desconectado.");
+
+                System.out.println("Conexión establecida");
+
+                salida.println(nameField.getText());
 
             } catch (IOException e) {
                 e.printStackTrace();
