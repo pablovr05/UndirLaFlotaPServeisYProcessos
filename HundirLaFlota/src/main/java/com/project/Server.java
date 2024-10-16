@@ -11,6 +11,8 @@ public class Server {
     public static ArrayList<Player> currentServerUsers = new ArrayList<Player>();
     public static ArrayList<Player> currentInGameUsers = new ArrayList<Player>();
 
+
+
     public static void main(String[] args) {
 
         try (ServerSocket servidorSocket = new ServerSocket(port)) {
@@ -30,6 +32,12 @@ public class Server {
                     currentServerUsers.add(player);
                     currentInGameUsers.add(player);
                 }
+
+                
+
+
+
+
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -2,15 +2,20 @@ package com.project;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+
 import java.util.ResourceBundle;
 import java.io.*;
 import java.net.*;
 
 
-public class Controller implements Initializable {
+public class ControllerConnect implements Initializable {
 
     @FXML
     private TextField nameField;
@@ -56,9 +61,30 @@ public class Controller implements Initializable {
 
                 salida.println(nameField.getText());
 
+                cambiarInterfazMatchmaking();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     } 
+
+    private void cambiarInterfazMatchmaking() {
+        try {
+            // Cargar el nuevo archivo FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/layout_matchmaking.fxml"));
+            Parent matchmakingView = loader.load();
+            
+            // Obtener la escena actual desde el botón o algún nodo del evento
+            Stage stage = (Stage) nameField.getScene().getWindow();
+
+            // Cambiar la escena a la nueva interfaz
+            Scene scene = new Scene(matchmakingView);
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            }
+    }
 }
