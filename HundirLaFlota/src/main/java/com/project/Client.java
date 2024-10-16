@@ -13,8 +13,13 @@ En server:
         - eliminar la opcion de ver el puntero del rival en la preparacion
         - detectar si el una vez se ha posicionado el barco, que esten dentro del tablero
     
+        - girar barco en mouseReleased
+            int objHeight = obj.getInt("rows");
+            int objWide = obj.getInt("cols");
+            int oldPositionX = obj.getInt("x");
+            int oldPositionY = obj.getInt("y");
 
-
+            
         - dibujar letras y numeros en num / col CtrlPlay
             public void drawGrid() {
         gc.setStroke(Color.BLACK);
