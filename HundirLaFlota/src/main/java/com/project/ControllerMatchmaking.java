@@ -2,19 +2,15 @@ package com.project;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.io.*;
-import java.net.*;
 
 public class ControllerMatchmaking implements Initializable {
     
@@ -28,27 +24,45 @@ public class ControllerMatchmaking implements Initializable {
     private Text userName;
 
     @FXML
-    private ComboBox objectivesName;
+    private ComboBox<String> objectivesName;
+
+    private PrintWriter salida;
+
+    private String nombre;
 
     @FXML
     private void acceptButtonAction(ActionEvent event) {
-        System.out.println("Se pultó el botón aceptar");
+        System.out.println("Se pulsó el botón aceptar");
     }
 
     @FXML
     private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
-
     } 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        System.out.println("Inicializando matchmaking...");
+        
 
     }
 
+    public void updatePlayerList(List<String> jugadores) {
+        System.out.println("Actualizando lista de jugadores: " + jugadores);
+        objectivesName.getItems().clear();
+        for (String jugador : jugadores) {
+            if (!jugador.trim().isEmpty() && !jugador.trim().equals(nombre)) {
+                objectivesName.getItems().add(jugador.trim());
+            }
+        }
+    }
 
-    
-    
+    public void setSalida(PrintWriter salida) {
+        this.salida = salida;
+    }
 
-    
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+        userName.setText(nombre);
+    }
 }

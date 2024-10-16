@@ -10,10 +10,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.util.ResourceBundle;
 import java.io.*;
 import java.net.*;
-
+import java.util.ResourceBundle;
 
 public class ControllerConnect implements Initializable {
 
@@ -32,59 +31,95 @@ public class ControllerConnect implements Initializable {
     @FXML
     private Button acceptButton;
 
+    private Socket socket;
+    private BufferedReader entrada;
+    private PrintWriter salida;
+
     @FXML
     private void acceptButtonAction(ActionEvent event) {
-        System.out.println("Se pultó el botón aceptar");
+        System.out.println("Se pulsó el botón aceptar");
         establecerConexión();
     }
 
     @FXML
     private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
-
+        // Aquí puedes cerrar la aplicación o volver a la pantalla anterior
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        // Inicialización si es necesario
     }
 
     private void establecerConexión() {
-        if (!nameField.getText().isEmpty() && !ipField.getText().isEmpty() && !portField.getText().isEmpty()) {
-            try (
-            Socket socket = new Socket(ipField.getText(), Integer.valueOf(portField.getText()));
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
-            ){
+        String nombre = nameField.getText().trim();
+        String ip = ipField.getText().trim();
+        String portText = portField.getText().trim();
 
-                System.out.println("Conexión establecida");
-
-                salida.println(nameField.getText());
-
-                cambiarInterfazMatchmaking();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (nombre.isEmpty() || ip.isEmpty() || portText.isEmpty()) {
+            System.out.println("Por favor, completa todos los campos.");
+            return;
         }
-    } 
 
-    private void cambiarInterfazMatchmaking() {
         try {
-            // Cargar el nuevo archivo FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/layout_matchmaking.fxml"));
-            Parent matchmakingView = loader.load();
-            
-            // Obtener la escena actual desde el botón o algún nodo del evento
-            Stage stage = (Stage) nameField.getScene().getWindow();
+            int port = Integer.parseInt(portText);
+            socket = new Socket(ip, port);
+            entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            salida = new PrintWriter(socket.getOutputStream(), true);
 
-            // Cambiar la escena a la nueva interfaz
-            Scene scene = new Scene(matchmakingView);
-            stage.setScene(scene);
+            salida.println(nombre);
+            System.out.println("Conexión establecida con el servidor.");
+
+            cambiarInterfazMatchmaking(nombre);
+
+            new Thread(() -> {
+                try {
+                    String message;
+                    while ((message = entrada.readLine()) != null) {
+                        if (message.startsWith("PLAYER_LIST:")) {
+                            String players = message.substring("PLAYER_LIST:".length());
+                            String[] playerNames = players.split(",");
+                            javafx.application.Platform.runLater(() -> {
+                                if (matchmakingController != null) {
+                                    matchmakingController.updatePlayerList(java.util.Arrays.asList(playerNames));
+                                }
+                            });
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (NumberFormatException e) {
+            System.out.println("Puerto inválido.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Error al conectar con el servidor.");
+            e.printStackTrace();
+        }
+    }
+
+    private ControllerMatchmaking matchmakingController;
+
+    private void cambiarInterfazMatchmaking(String nombre) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/layout_matchmaking.fxml"));
+            Parent root = loader.load();
+
+            matchmakingController = loader.getController();
+
+            matchmakingController.setNombre(nombre);
+           
+            matchmakingController.setSalida(salida);
+
+            Stage stage = (Stage) acceptButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            }
+        }
     }
 }
