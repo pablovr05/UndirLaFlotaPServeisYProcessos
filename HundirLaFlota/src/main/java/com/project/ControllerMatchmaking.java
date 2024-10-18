@@ -32,20 +32,25 @@ public class ControllerMatchmaking implements Initializable {
 
     @FXML
     private void acceptButtonAction(ActionEvent event) {
-        System.out.println("Se pulsó el botón aceptar");
+        String selectedPlayer = objectivesName.getValue();
+        if (selectedPlayer != null && !selectedPlayer.trim().isEmpty()) {
+            System.out.println("Se pulsó el botón aceptar y se seleccionó: " + selectedPlayer);
+            
+            salida.println("SELECCION:" + selectedPlayer);
+        } else {
+            System.out.println("No se ha seleccionado ningún jugador.");
+        }
     }
 
     @FXML
     private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
-        System.out.println(Server.currentInGameUsers);
     } 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         System.out.println("Inicializando matchmaking...");
         
-
     }
 
     public void updatePlayerList(List<String> jugadores) {

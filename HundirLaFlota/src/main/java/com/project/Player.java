@@ -3,25 +3,29 @@ package com.project;
 import java.net.Socket;
 
 public class Player {
-
-    private String nom;
+    private String nombre;
     private Socket socket;
+    private String seleccionado;
 
-    public Player(String nom, Socket socket) {
-        this.nom = nom;
+    public Player(String nombre, Socket socket) {
+        this.nombre = nombre;
         this.socket = socket;
+        this.seleccionado = null;
     }
 
     public String getNom() {
-        return nom;
+        return nombre;
     }
 
     public Socket getSocket() {
         return socket;
     }
 
-    @Override
-    public String toString() {
-        return "Name: " + nom + " " + socket;
+    public String getSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(String seleccionado) {
+        this.seleccionado = seleccionado;
     }
 }
