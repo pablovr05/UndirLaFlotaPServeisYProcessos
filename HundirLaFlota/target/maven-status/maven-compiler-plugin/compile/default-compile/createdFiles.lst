@@ -1,9 +1,7 @@
-com\project\GridMaker.class
-com\project\Client.class
-com\project\UtilsWS.class
+com\project\ControllerMatchmaking.class
+com\project\Game.class
 com\project\Main.class
-com\project\GridController.class
 com\project\Server.class
-com\project\Controller.class
-com\project\UtilsViews.class
-com\project\UtilsWS$1.class
+com\project\ControllerConnect.class
+com\project\ClientHandler.class
+com\project\Player.class
