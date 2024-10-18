@@ -38,6 +38,7 @@ public class ControllerMatchmaking implements Initializable {
     @FXML
     private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
+        System.out.println(Server.currentInGameUsers);
     } 
 
     @Override
