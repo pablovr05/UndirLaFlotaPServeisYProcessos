@@ -1,4 +1,4 @@
-package com.client;
+package com.project;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -87,15 +87,16 @@ public class CtrlPlay implements Initializable {
             newPosition.put("col", -1);
             newPosition.put("row", -1);
         }
-        clientMousePositions.put(Main.clientId, newPosition);
+        //clientMousePositions.put(Main.clientId, newPosition);
 
-        JSONObject msgObj = clientMousePositions.get(Main.clientId);
-        msgObj.put("type", "clientMouseMoving");
-        msgObj.put("clientId", Main.clientId);
+        //JSONObject msgObj = clientMousePositions.get(Main.clientId);
+        //msgObj.put("type", "clientMouseMoving");
+        //msgObj.put("clientId", Main.clientId);
     
+        /*
         if (Main.wsClient != null) {
             Main.wsClient.safeSend(msgObj.toString());
-        }
+        }*/
     }
 
     private void onMousePressed(MouseEvent event) {
@@ -139,9 +140,9 @@ public class CtrlPlay implements Initializable {
             msgObj.put("type", "clientSelectableObjectMoving");
             msgObj.put("objectId", obj.getString("objectId"));
         
-            if (Main.wsClient != null) {
+            /*if (Main.wsClient != null) {
                 Main.wsClient.safeSend(msgObj.toString());
-            }
+            }*/
         }
         setOnMouseMoved(event);
     }
@@ -180,9 +181,9 @@ public class CtrlPlay implements Initializable {
             msgObj.put("objectId", obj.getString("objectId"));
             System.out.println("aa");
         
-            if (Main.wsClient != null) {
+            /*if (Main.wsClient != null) {
                 Main.wsClient.safeSend(msgObj.toString());
-            }
+            }*/
             mouseDragging = true;
 
             mouseDragging = false;

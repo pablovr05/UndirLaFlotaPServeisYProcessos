@@ -77,12 +77,13 @@ public class ClientHandler implements Runnable {
                     if (currentPlayer.getNom().equals(p.getSeleccionado())) {
                         System.out.println("¡Coincidencia mutua entre " + currentPlayer.getNom() + " y " + selectedPlayerName + "!");
                         sendMatchNotification(currentPlayer, p);
+                        break; // Romper el bucle después de encontrar la coincidencia
                     }
-                    break;
                 }
             }
         }
     }
+    
 
     private void sendMatchNotification(Player player1, Player player2) {
         try {
@@ -90,14 +91,14 @@ public class ClientHandler implements Runnable {
             PrintWriter pw2 = new PrintWriter(player2.getSocket().getOutputStream(), true);
             System.out.println("Notificando a " + player1.getNom() + " que ha hecho match con " + player2.getNom());
             System.out.println("Notificando a " + player2.getNom() + " que ha hecho match con " + player1.getNom());
-
-            System.out.println(pw1 + " " + pw2);
+    
             pw1.println("MATCH_FOUND:" + player2.getNom());
             pw2.println("MATCH_FOUND:" + player1.getNom());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
 
     private void broadcastPlayerList() {
         synchronized (Server.currentServerUsers) {

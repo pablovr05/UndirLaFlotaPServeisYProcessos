@@ -43,6 +43,8 @@ public class ControllerMatchmaking implements Initializable {
     private void acceptButtonAction(ActionEvent event) {
         String selectedPlayer = objectivesName.getValue();
         if (selectedPlayer != null && !selectedPlayer.trim().isEmpty()) {
+            acceptButton.setDisable(true);
+            cancelButton.setDisable(false);
             System.out.println("Se pulsó el botón aceptar y se seleccionó: " + selectedPlayer);
             
             salida.println("SELECCION:" + selectedPlayer); // Envía la selección al servidor
@@ -54,10 +56,14 @@ public class ControllerMatchmaking implements Initializable {
     @FXML
     private void cancelButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón cancelar");
+        acceptButton.setDisable(false);
+        cancelButton.setDisable(true);
+        
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        cancelButton.setDisable(false);
         System.out.println("Inicializando matchmaking...");
     }
 
@@ -112,7 +118,7 @@ public class ControllerMatchmaking implements Initializable {
                     // Notificar al usuario sobre el match (en el hilo de la UI)
                     Platform.runLater(() -> notifyMatch(matchedPlayer));
 
-                    cambiarInterfazPonerBarcos();
+                    //cambiarInterfazPonerBarcos();
                 }
             }
         } catch (IOException e) {
@@ -125,34 +131,34 @@ public class ControllerMatchmaking implements Initializable {
         System.out.println("¡Has hecho match con " + matchedPlayer + "!");
 
         // Mostrar una alerta o actualizar algún componente de la interfaz gráfica
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        /*Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("¡Match encontrado!");
         alert.setHeaderText(null);
         alert.setContentText("¡Has hecho match con " + matchedPlayer + "!");
-        alert.showAndWait();
+        alert.showAndWait();*/
     }
-
-    private ControllerMatchmaking matchmakingController;
 
     private void cambiarInterfazPonerBarcos() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/viewPlay.fxml"));
-            Parent root = loader.load();
-
-            //matchmakingController = loader.getController();
-
-            //matchmakingController.setNombre(nombre);
-
-            //matchmakingController.setEntrada(entrada);
-           
-            //matchmakingController.setSalida(salida);
-
-            Stage stage = (Stage) acceptButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/viewPlay.fxml"));
+                Parent root = loader.load();
+    
+                //matchmakingController = loader.getController();
+    
+                //matchmakingController.setNombre(nombre);
+    
+                //matchmakingController.setEntrada(entrada);
+            
+                //matchmakingController.setSalida(salida);
+    
+                Stage stage = (Stage) acceptButton.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+    
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
-}
+}    

@@ -50,6 +50,8 @@ public class ControllerConnect implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Inicialización si es necesario
+        ipField.setText("localhost");
+        portField.setText("12345");
     }
 
     private void establecerConexión() {
