@@ -3,11 +3,15 @@ package com.project;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,12 +94,12 @@ public class ControllerMatchmaking implements Initializable {
 
     // Método que escucha los mensajes que llegan del servidor
     public void recibirMensajes() {
-        String message;
         System.out.println("inicio de captar mensajes");
+        String message;
         try {
             // Bucle para recibir mensajes del servidor
             while ((message = entrada.readLine()) != null) {
-                System.out.println("Se recibió mensaje: " + message);
+                System.out.println("Se recibió mensaje desde ControllerMatchMaking: " + message);
                 if (message.startsWith("PLAYER_LIST:")) {
                     String playerList = message.substring(12); // Obtener la lista de jugadores
                     List<String> jugadores = List.of(playerList.split(",")); // Convertir a lista
@@ -107,6 +111,8 @@ public class ControllerMatchmaking implements Initializable {
                     
                     // Notificar al usuario sobre el match (en el hilo de la UI)
                     Platform.runLater(() -> notifyMatch(matchedPlayer));
+
+                    cambiarInterfazPonerBarcos();
                 }
             }
         } catch (IOException e) {
@@ -124,5 +130,29 @@ public class ControllerMatchmaking implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("¡Has hecho match con " + matchedPlayer + "!");
         alert.showAndWait();
+    }
+
+    private ControllerMatchmaking matchmakingController;
+
+    private void cambiarInterfazPonerBarcos() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/viewPlay.fxml"));
+            Parent root = loader.load();
+
+            //matchmakingController = loader.getController();
+
+            //matchmakingController.setNombre(nombre);
+
+            //matchmakingController.setEntrada(entrada);
+           
+            //matchmakingController.setSalida(salida);
+
+            Stage stage = (Stage) acceptButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
