@@ -1,5 +1,6 @@
 package com.project;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,6 +12,10 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+
 
 public class ControllerMatchmaking implements Initializable {
     
@@ -25,6 +30,8 @@ public class ControllerMatchmaking implements Initializable {
 
     @FXML
     private ComboBox<String> objectivesName;
+
+    private BufferedReader entrada;
 
     private PrintWriter salida;
 
@@ -63,6 +70,12 @@ public class ControllerMatchmaking implements Initializable {
         }
     }
 
+    public void setEntrada(BufferedReader entrada) {
+        this.entrada = entrada;
+
+        new Thread(this::recibirMensajes).start();
+    }
+
     public void setSalida(PrintWriter salida) {
         this.salida = salida;
     }
@@ -70,5 +83,30 @@ public class ControllerMatchmaking implements Initializable {
     public void setNombre(String nombre) {
         this.nombre = nombre;
         userName.setText(nombre);
+    }
+
+    public void recibirMensajes() {
+        String message;
+        try {
+            while ((message = entrada.readLine()) != null) {
+                if (message.startsWith("PLAYER_LIST:")) {
+                    String playerList = message.substring(12); // Obtener la lista de jugadores
+                    List<String> jugadores = List.of(playerList.split(",")); // Convertir a lista
+                    Platform.runLater(() -> updatePlayerList(jugadores));
+                } else if (message.startsWith("MATCH_FOUND:")) {
+                    String matchedPlayer = message.substring(12); // Obtener el nombre del jugador con el que se ha hecho match
+                    Platform.runLater(() -> notifyMatch(matchedPlayer)); // Notificar al usuario
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Método para notificar al usuario que ha hecho match
+    public void notifyMatch(String matchedPlayer) {
+        System.out.println("¡Bien! Has hecho match con " + matchedPlayer);
+        // Aquí puedes agregar lógica adicional para la interfaz gráfica, por ejemplo mostrar una alerta
     }
 }
