@@ -1,5 +1,6 @@
 com\project\ControllerMatchmaking.class
 com\project\Game.class
+com\project\ControllerGame.class
 com\project\Main.class
 com\project\Server.class
 com\project\ControllerConnect.class

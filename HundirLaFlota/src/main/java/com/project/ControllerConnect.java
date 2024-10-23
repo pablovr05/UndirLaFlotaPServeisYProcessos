@@ -111,6 +111,8 @@ public class ControllerConnect implements Initializable {
             matchmakingController = loader.getController();
 
             matchmakingController.setNombre(nombre);
+
+            matchmakingController.setEntrada(entrada);
            
             matchmakingController.setSalida(salida);
 

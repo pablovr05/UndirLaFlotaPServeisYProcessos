@@ -7,11 +7,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
-
     private Socket socket;
     private BufferedReader entrada;
     private PrintWriter salida;
-    public static Player player;
+    private Player player;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -35,7 +34,6 @@ public class ClientHandler implements Runnable {
 
             player = new Player(playerName, socket);
             System.out.println("Jugador conectado: " + playerName);
-
             synchronized (Server.currentServerUsers) {
                 Server.currentServerUsers.add(player);
             }
@@ -45,12 +43,9 @@ public class ClientHandler implements Runnable {
             String message;
             while ((message = entrada.readLine()) != null) {
                 if (message.startsWith("SELECCION:")) {
-                    String selectedPlayerName = message.substring(10); // Obtener el nombre del jugador seleccionado
+                    String selectedPlayerName = message.substring(10);
                     player.setSeleccionado(selectedPlayerName);
-
                     System.out.println(playerName + " seleccionó a " + selectedPlayerName);
-                    
-                    // Verificar si el jugador seleccionado también seleccionó al jugador actual
                     checkMutualSelection(player, selectedPlayerName);
                 } else {
                     System.out.println("Mensaje de " + playerName + ": " + message);
@@ -75,36 +70,34 @@ public class ClientHandler implements Runnable {
         }
     }
 
-private void checkMutualSelection(Player currentPlayer, String selectedPlayerName) {
-    synchronized (Server.currentServerUsers) {
-        for (Player p : Server.currentServerUsers) {
-            if (p.getNom().equals(selectedPlayerName)) {
-                // Verificar si el jugador seleccionado también seleccionó al jugador actual
-                if (currentPlayer.getNom().equals(p.getSeleccionado())) {
-                    // Coincidencia mutua
-                    System.out.println("¡Coincidencia mutua entre " + currentPlayer.getNom() + " y " + selectedPlayerName + "!");
-
-                    // Notificar a ambos jugadores
-                    sendMatchNotification(currentPlayer, p);
+    private void checkMutualSelection(Player currentPlayer, String selectedPlayerName) {
+        synchronized (Server.currentServerUsers) {
+            for (Player p : Server.currentServerUsers) {
+                if (p.getNom().equals(selectedPlayerName)) {
+                    if (currentPlayer.getNom().equals(p.getSeleccionado())) {
+                        System.out.println("¡Coincidencia mutua entre " + currentPlayer.getNom() + " y " + selectedPlayerName + "!");
+                        sendMatchNotification(currentPlayer, p);
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
-}
 
-private void sendMatchNotification(Player player1, Player player2) {
-    try {
-        PrintWriter pw1 = new PrintWriter(player1.getSocket().getOutputStream(), true);
-        PrintWriter pw2 = new PrintWriter(player2.getSocket().getOutputStream(), true);
-        
-        pw1.println("MATCH_FOUND:" + player2.getNom());
-        pw2.println("MATCH_FOUND:" + player1.getNom());
-    } catch (IOException e) {
-        e.printStackTrace();
+    private void sendMatchNotification(Player player1, Player player2) {
+        try {
+            PrintWriter pw1 = new PrintWriter(player1.getSocket().getOutputStream(), true);
+            PrintWriter pw2 = new PrintWriter(player2.getSocket().getOutputStream(), true);
+            System.out.println("Notificando a " + player1.getNom() + " que ha hecho match con " + player2.getNom());
+            System.out.println("Notificando a " + player2.getNom() + " que ha hecho match con " + player1.getNom());
+
+            System.out.println(pw1 + " " + pw2);
+            pw1.println("MATCH_FOUND:" + player2.getNom());
+            pw2.println("MATCH_FOUND:" + player1.getNom());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
-
 
     private void broadcastPlayerList() {
         synchronized (Server.currentServerUsers) {
