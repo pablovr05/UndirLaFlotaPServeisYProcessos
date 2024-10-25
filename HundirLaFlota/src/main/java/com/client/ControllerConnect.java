@@ -82,15 +82,16 @@ public class ControllerConnect implements Initializable {
                     // Enviar el nombre al servidor
                     clienteWebSocket.send("{\"type\":\"setName\",\"name\":\"" + nombre + "\"}");
 
-                    // Change to the matchmaking view on the JavaFX application thread
-                    Platform.runLater(() -> {
-                        try {
-                            UtilsViews.addView(getClass(), "layout_matchmaking", "/assets/layout_matchmaking.fxml");
-                            UtilsViews.setViewAnimating("layout_matchmaking");
-                        } catch (Exception e) {
-                            e.printStackTrace();  // Corrected method name
-                        }
-                    });
+                    System.out.println("Cambiando....");
+
+                    try {
+                        UtilsViews.addView(getClass(), "layout_matchmaking", "/assets/layout_matchmaking.fxml");
+                        UtilsViews.setViewAnimating("layout_matchmaking");
+                    } catch (Exception e) {
+                        e.printStackTrace(); 
+                    }
+                    
+                    System.out.println("Cambiando1....");
                 }
 
                 @Override
