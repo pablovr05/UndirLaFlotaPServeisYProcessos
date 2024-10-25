@@ -1,5 +1,6 @@
 package com.client;
 
+import javafx.application.Platform;  // Import Platform for UI thread handling
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -80,6 +81,16 @@ public class ControllerConnect implements Initializable {
                     System.out.println("Conexión establecida con el servidor: " + uri);
                     // Enviar el nombre al servidor
                     clienteWebSocket.send("{\"type\":\"setName\",\"name\":\"" + nombre + "\"}");
+
+                    // Change to the matchmaking view on the JavaFX application thread
+                    Platform.runLater(() -> {
+                        try {
+                            UtilsViews.addView(getClass(), "layout_matchmaking", "/assets/layout_matchmaking.fxml");
+                            UtilsViews.setViewAnimating("layout_matchmaking");
+                        } catch (Exception e) {
+                            e.printStackTrace();  // Corrected method name
+                        }
+                    });
                 }
 
                 @Override
