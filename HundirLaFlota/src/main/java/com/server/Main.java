@@ -15,15 +15,21 @@ import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.client.ClientFX;
+
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
+
+import java.util.List;
+import java.util.ArrayList;
 
 public class Main extends WebSocketServer {
 
-    private Map<WebSocket, String> clients;
+    private List<ClientFX> clients;
 
     public Main(InetSocketAddress address) {
         super(address);
-        clients = new ConcurrentHashMap<>();
+        clients = new ArrayList<ClientFX>();
     }
 
     @Override
@@ -36,8 +42,15 @@ public class Main extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        String clientName = clients.remove(conn);
-        System.out.println("WebSocket client disconnected: " + clientName + " with conn: " + conn);
+        String clientName = null;
+        for (ClientFX cliente : clients) {
+            if(cliente.getClienteWebSocket().equals(conn)) {
+                clientName = cliente.getNombre();
+                clients.remove(cliente);
+                System.out.println("WebSocket client disconnected: " + clientName + " with conn: " + conn);
+                break;
+            }
+        }
         sendClientsList();
     }
 
@@ -52,7 +65,7 @@ public class Main extends WebSocketServer {
                 case "setName":
                     // Establecer el nombre del cliente
                     String clientName = obj.getString("name");
-                    clients.put(conn, clientName);
+                    ClientFX new_client = ClientFX.setInstance(clientName, conn);
                     System.out.println("Nombre del cliente establecido: " + clientName);
                     sendClientsList(); // Actualiza la lista de clientes
                     break;
@@ -125,7 +138,7 @@ public class Main extends WebSocketServer {
     public static void main(String[] args) {
 
         // WebSockets server
-        Main server = new Main(new InetSocketAddress(3000));
+        Main server = new Main(new InetSocketAddress(12345));
         server.start();
         
         LineReader reader = LineReaderBuilder.builder().build();
