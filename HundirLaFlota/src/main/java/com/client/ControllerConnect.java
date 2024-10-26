@@ -85,8 +85,7 @@ public class ControllerConnect implements Initializable {
                     System.out.println("Cambiando....");
 
                     try {
-                        UtilsViews.addView(getClass(), "layout_matchmaking", "/assets/layout_matchmaking.fxml");
-                        UtilsViews.setViewAnimating("layout_matchmaking");
+                        UtilsViews.setView("layout_matchmaking");
                     } catch (Exception e) {
                         e.printStackTrace(); 
                     }
