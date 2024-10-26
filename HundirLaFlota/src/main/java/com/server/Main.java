@@ -72,6 +72,21 @@ public class Main extends WebSocketServer {
                 case "clientSelectableObjectMoving":
                     // Manejar el movimiento de objetos seleccionables del cliente
                     break;
+                case "playerAccepted":
+                    String player = obj.getString("player");
+                    String selectingPlayer = obj.getString("selectingPlayer");
+                    String socketId = obj.getString("socketId");
+                    String messageToDisplay = String.format("Jugador %s (socketId: %s) ha seleccionado a jugador %s", selectingPlayer, socketId, player);
+                    System.out.println(messageToDisplay);
+                    for (ClientFX cliente : clients) {
+                        if (cliente.getClienteWebSocket() == conn) {
+                            cliente.setSelectedPlayerName(player);
+                            //Enviar con JSON entrada
+                            cliente.getClienteWebSocket().send("Se te ha asignado como seleccionado a " + player);
+                        }
+                        //logica para detectar si el otro también ha seleccionado al otro para jugar
+                    }
+                    break;         
             }
         }
     }

@@ -8,6 +8,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -27,13 +28,25 @@ public class ControllerMatchmaking implements Initializable {
     @FXML
     private ComboBox<String> objectivesName;
 
-    private String nombre;
+    public static List<String> nameList;
+
+    public static ControllerMatchmaking instance;
 
     @FXML
     private void acceptButtonAction(ActionEvent event) {
         String selectedPlayer = objectivesName.getValue();
         if (selectedPlayer != null && !selectedPlayer.trim().isEmpty()) {
+
+            cancelButton.setDisable(false);
+            acceptButton.setDisable(true);
+
             System.out.println("Se pulsó el botón aceptar y se seleccionó: " + selectedPlayer);
+
+            ControllerConnect controllerConnect = ControllerConnect.instance;
+
+            String message = String.format("{\"type\":\"playerAccepted\",\"player\":\"%s\",\"selectingPlayer\":\"%s\",\"socketId\":\"%s\"}", selectedPlayer, ControllerConnect.nombre, ControllerConnect.clienteWebSocket);
+
+            controllerConnect.sendMessage(message);
             
         } else {
             System.out.println("No se ha seleccionado ningún jugador.");
@@ -42,11 +55,24 @@ public class ControllerMatchmaking implements Initializable {
 
     @FXML
     private void cancelButtonAction(ActionEvent event) {
+        
+        cancelButton.setDisable(true);
+        acceptButton.setDisable(false);
+        
         System.out.println("Se pulsó el botón cancelar");
+
+        ControllerConnect controllerConnect = ControllerConnect.instance;
+
+        String message = String.format("{\"type\":\"playerAccepted\",\"player\":\"%s\",\"selectingPlayer\":\"%s\",\"socketId\":\"%s\"}", null, ControllerConnect.nombre, ControllerConnect.clienteWebSocket);
+
+        controllerConnect.sendMessage(message);
     } 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        instance = this;
+        setNombre();
+        cancelButton.setDisable(true);
         System.out.println("Inicializando matchmaking...");
         
     }
@@ -55,14 +81,13 @@ public class ControllerMatchmaking implements Initializable {
         System.out.println("Actualizando lista de jugadores: " + jugadores);
         objectivesName.getItems().clear();
         for (String jugador : jugadores) {
-            if (!jugador.trim().isEmpty() && !jugador.trim().equals(nombre)) {
+            if (!jugador.trim().isEmpty() && !jugador.trim().equals(ControllerConnect.nombre)) {
                 objectivesName.getItems().add(jugador.trim());
             }
         }
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-        userName.setText(nombre);
+    private void setNombre() {
+        userName.setText(ControllerConnect.nombre);
     }
 }

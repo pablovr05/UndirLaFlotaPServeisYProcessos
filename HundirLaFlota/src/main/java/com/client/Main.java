@@ -9,23 +9,30 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    public static Stage stageFX;
+
     @Override
     public void start(Stage stage) throws Exception {
 
+        stageFX = stage;
         // Carrega la vista inicial des del fitxer FXML
         Parent root = FXMLLoader.load(getClass().getResource("/assets/layout_connect.fxml"));
         Scene scene = new Scene(root);
 
-        stage.setScene(scene);
-        stage.setResizable(true);
-        stage.setTitle("JavaFX App");
-        stage.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
-        stage.show();
+        stageFX.setScene(scene);
+        stageFX.setResizable(true);
+        stageFX.setTitle("JavaFX App");
+        stageFX.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
+        stageFX.show();
 
         // Afegeix una icona només si no és un Mac
         if (!System.getProperty("os.name").contains("Mac")) {
-            stage.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
+            stageFX.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
         }
+    }
+
+    public static Stage getStage() {
+        return stageFX;
     }
 
     public static void main(String[] args) {

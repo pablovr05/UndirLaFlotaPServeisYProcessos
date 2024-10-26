@@ -6,6 +6,7 @@ public class ClientFX {
 
     private String nombre; 
     private WebSocket clienteWebSocket; 
+    private String selectedPlayerName = null;
 
     public ClientFX(String nombre, WebSocket clienteWebSocket) {
         this.nombre = nombre;
@@ -18,5 +19,13 @@ public class ClientFX {
 
     public WebSocket getClienteWebSocket() {
         return clienteWebSocket;
+    }
+
+    public String getSelectedPlayerName() {
+        return selectedPlayerName;
+    }
+
+    public void setSelectedPlayerName(String selectedPlayerName) {
+        this.selectedPlayerName = selectedPlayerName;
     }
 }

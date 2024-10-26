@@ -6,11 +6,15 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class UtilsViews {
@@ -175,5 +179,19 @@ public class UtilsViews {
 
         // Remove focus from buttons
         parentContainer.requestFocus();
+    }
+
+    public static void cambiarFrame(String xmlString) {
+        Platform.runLater(() -> {
+        Stage stage = Main.getStage();
+        try {
+            Parent root = FXMLLoader.load(UtilsViews.class.getResource(xmlString));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        }); 
     }
 }
