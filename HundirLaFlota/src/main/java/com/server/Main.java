@@ -18,9 +18,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Main extends WebSocketServer {
 
     private List<ClientFX> clients; // Lista de clientes conectados
+
+    private static Map<String, JSONObject> selectableObjects = new HashMap<>();
+    private static Map<String, Map<String, JSONObject>> clientSelectableObjects;
 
     public Main(InetSocketAddress address) {
         super(address);
@@ -224,4 +230,42 @@ public class Main extends WebSocketServer {
         }
     }
 
+    public static void addShipsToGrid() {
+        // Add objects
+        String name0 = "O0";
+        JSONObject obj0 = new JSONObject();
+        obj0.put("objectId", name0);
+        obj0.put("x", 650);
+        obj0.put("y", 150);
+        obj0.put("cols", 1);
+        obj0.put("rows", 1);
+        selectableObjects.put(name0, obj0);
+
+        String name1 = "O1";
+        JSONObject obj1 = new JSONObject();
+        obj1.put("objectId", name1);
+        obj1.put("x", 700);
+        obj1.put("y", 150);
+        obj1.put("cols", 1);
+        obj1.put("rows", 3);
+        selectableObjects.put(name1, obj1);
+
+        String name2 = "02";
+        JSONObject obj2 = new JSONObject();
+        obj2.put("objectId", name2);
+        obj2.put("x", 750);
+        obj2.put("y", 150);
+        obj2.put("cols", 1);
+        obj2.put("rows", 4);
+        selectableObjects.put(name2, obj2);
+
+        String name3 = "03";
+        JSONObject obj3 = new JSONObject();
+        obj3.put("objectId", name3);
+        obj3.put("x", 650); // X - Y posicion dibujo inicial
+        obj3.put("y", 200);
+        obj3.put("cols", 1);  // Girar cols y rows para girar el barco
+        obj3.put("rows", 6);
+        selectableObjects.put(name3, obj3);
+    }
 }
