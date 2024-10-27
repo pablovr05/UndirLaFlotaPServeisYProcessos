@@ -42,29 +42,31 @@ public class ControllerPlay implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
-        // Get drawing context
         this.gc = canvas.getGraphicsContext2D();
-
-        // Set listeners
-        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> { onSizeChanged(); });
-        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> { onSizeChanged(); });
         
+        // Establecer el tamaño del canvas fijo
+        canvas.setWidth(365);
+        canvas.setHeight(365);
+
+        // Configurar los listeners
+        // El tamaño del canvas no debe cambiar al redimensionar la ventana
+        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> {});
+        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> {});
+
+        // Configurar los manejadores de eventos del ratón
         canvas.setOnMouseMoved(this::setOnMouseMoved);
         canvas.setOnMousePressed(this::onMousePressed);
         canvas.setOnMouseDragged(this::onMouseDragged);
         canvas.setOnMouseReleased(this::onMouseReleased);
 
-        canvas.setWidth(1000);
-        canvas.setHeight(1000);
+        // Definir la rejilla
+        grid = new PlayGrid(30, 30, 30, 10, 10);  // Asegúrate de que estos valores sean correctos para tu rejilla
 
-        // Define grid
-        grid = new PlayGrid(100, 100, 60, 10, 10);
-
-        // Start run/draw timer bucle
+        // Iniciar el temporizador de animación
         animationTimer = new PlayTimer(this::run, this::draw, 0);
         start();
     }
+
 
     // When window changes its size
     public void onSizeChanged() {
@@ -286,77 +288,52 @@ public class ControllerPlay implements Initializable {
 
     // Draw game to canvas
     public void draw() {
-
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        // Draw colored 'over' cells
-
-        for (String clientId : clientMousePositions.keySet()) {
-            JSONObject position = clientMousePositions.get(clientId);
-
-            int col = position.getInt("col");
-            int row = position.getInt("row");
-
-            // Comprovar si està dins dels límits de la graella
-            if (row >= 0 && col >= 0) {
-                if ("A".equals(clientId)) {
-                    gc.setFill(Color.LIGHTBLUE); 
-                } else {
-                    gc.setFill(Color.LIGHTGREEN); 
-                }
-                // Emplenar la casella amb el color clar
-                //gc.fillRect(grid.getCellX(col), grid.getCellY(row), grid.getCellSize(), grid.getCellSize());
-            }
-        }
-
-        // Draw grid
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // Limpia el canvas
+    
+        // Dibuja la rejilla
         drawGrid();
-
-        // Draw selectable objects
+    
+        // Dibuja los objetos seleccionables
         for (String objectId : selectableObjects.keySet()) {
             JSONObject selectableObject = selectableObjects.get(objectId);
             drawSelectableObject(objectId, selectableObject);
         }
-
-         // Draw mouse circles
+    
+        // Dibuja los círculos del ratón si es necesario
         if (playingMatch) {
             for (String clientId : clientMousePositions.keySet()) {
                 JSONObject position = clientMousePositions.get(clientId);
-                if ("A".equals(clientId)) {
-                    gc.setFill(Color.BLUE);
-                } else {
-                    gc.setFill(Color.GREEN);
-                }
+                gc.setFill("A".equals(clientId) ? Color.BLUE : Color.GREEN);
                 gc.fillOval(position.getInt("x") - 5, position.getInt("y") - 5, 10, 10);
             }
         }
-
-        // Draw FPS if needed
-        if (showFPS) { animationTimer.drawFPS(gc); }   
-        System.out.println(4);
-        
+    
+        // Dibuja FPS si es necesario
+        if (showFPS) {
+            animationTimer.drawFPS(gc);
+        }
     }
+    
 
     public void drawGrid() {
-        System.out.println(2);
         gc.setStroke(Color.BLACK);
-
+    
         for (int row = 0; row < grid.getRows(); row++) {
             for (int col = 0; col < grid.getCols(); col++) {
                 double cellSize = grid.getCellSize();
                 double x = grid.getStartX() + col * cellSize;
                 double y = grid.getStartY() + row * cellSize;
+    
                 gc.strokeRect(x, y, cellSize, cellSize);
-
-                // Draw column letters
+    
+                // Dibuja las letras de las columnas y los números de las filas
                 if (row == 0) {
                     String colLetter = String.valueOf((char) ('A' + col));
                     gc.setFill(Color.BLACK);
                     gc.setFont(javafx.scene.text.Font.font(12));
                     gc.fillText(colLetter, x + cellSize / 2 - 5, y - 5);
                 }
-
-                // Draw row numbers
+    
                 if (col == 0) {
                     String rowNumber = String.valueOf(row + 1);
                     gc.setFill(Color.BLACK);
@@ -365,8 +342,8 @@ public class ControllerPlay implements Initializable {
                 }
             }
         }
-        System.out.println(3);
     }
+    
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
         double cellSize = grid.getCellSize();
