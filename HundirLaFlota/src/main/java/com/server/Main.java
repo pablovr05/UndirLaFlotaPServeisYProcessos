@@ -1,6 +1,9 @@
 package com.server;
 
 import com.client.ClientFX;
+
+import javafx.fxml.JavaFXBuilderFactory;
+
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ClientHandshake;
@@ -78,14 +81,56 @@ public class Main extends WebSocketServer {
                     String socketId = obj.getString("socketId");
                     String messageToDisplay = String.format("Jugador %s (socketId: %s) ha seleccionado a jugador %s", selectingPlayer, socketId, player);
                     System.out.println(messageToDisplay);
+
+                    System.out.println(-1);
+
+                    ClientFX clienteSeleccionado = null;
+
                     for (ClientFX cliente : clients) {
-                        if (cliente.getClienteWebSocket() == conn) {
-                            cliente.setSelectedPlayerName(player);
-                            //Enviar con JSON entrada
-                            cliente.getClienteWebSocket().send("Se te ha asignado como seleccionado a " + player);
-                        }
-                        //logica para detectar si el otro también ha seleccionado al otro para jugar
+                        if (cliente.getNombre().equals(player)) { //Cliente seleccionado
+                            clienteSeleccionado = cliente;                       }
                     }
+
+                    ClientFX clienteSeleccionando = null;
+
+                    for (ClientFX cliente : clients) {
+                        if (cliente.getClienteWebSocket() == conn) { //Cliente que selecciona
+                            clienteSeleccionando = cliente;
+                            if (clienteSeleccionado != null) {
+                                clienteSeleccionando.setSelectedPlayerName(clienteSeleccionado.getNombre());
+                            } else {
+                                clienteSeleccionando.setSelectedPlayerName(null);
+                            }
+                        }
+                    }
+
+                    System.out.println(1);
+
+                    for (ClientFX cliente : clients) {
+                        System.out.println(cliente);
+                    }
+
+                    System.out.println(2);
+
+                    if (clienteSeleccionado != null) {
+                        System.out.println("Cliente " + clienteSeleccionando.getNombre() + " ha seleccionado a " + clienteSeleccionado.getNombre());
+                        if (checkMutualSelection(clienteSeleccionando, clienteSeleccionado)) {
+                            if (sendMatchConfirmedMessages(clienteSeleccionando, clienteSeleccionado)) {
+                                System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionando.getNombre());
+                            } else {
+                                System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionando.getNombre());
+                            }
+                            if (sendMatchConfirmedMessages(clienteSeleccionado, clienteSeleccionando)) {
+                                System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionado.getNombre());
+                            } else {
+                                System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionado.getNombre());
+                            }
+                        }
+                    } else {
+                        System.out.println("La instancia de clienteseleccionado es null ya que el cliente ha dado a cancelar.");
+                        System.out.println("Para el cliente: " + clienteSeleccionando.getNombre() + " ha seleccionado " + null);
+                    }
+
                     break;         
             }
         }
@@ -127,6 +172,35 @@ public class Main extends WebSocketServer {
         setConnectionLostTimeout(100);
     }
 
+    private boolean checkMutualSelection(ClientFX seleccionando, ClientFX seleccionado ) {
+        if (seleccionando.getSelectedPlayerName() != null && seleccionado.getSelectedPlayerName() != null) {
+            if (seleccionando.getNombre().equals(seleccionado.getSelectedPlayerName()) && seleccionado.getNombre().equals(seleccionando.getSelectedPlayerName())) {
+                System.out.println("Ha habido match entre: " + seleccionando.getNombre() + " y " + seleccionado.getNombre());
+                return true;
+            } else {
+                System.out.println(seleccionado.getNombre() + " no ha seleccionado a nadie o no te tiene seleccionado");
+            }
+        }
+        return false;
+    }
+
+    private boolean sendMatchConfirmedMessages(ClientFX clienteUsuario, ClientFX clienteEnemigo) {
+        JSONObject message = new JSONObject();
+        message.put("type", "matchConfirm");
+        message.put("enemyName", clienteEnemigo.getNombre());
+
+        WebSocket conn = clienteUsuario.getClienteWebSocket();
+        try {
+            conn.send(message.toString());
+            return true;
+        } catch (WebsocketNotConnectedException e) {
+            System.out.println("Cliente no conectado: " + clienteUsuario.getNombre());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         Main server = new Main(new InetSocketAddress(12345));
         server.start();
@@ -151,4 +225,5 @@ public class Main extends WebSocketServer {
             System.out.println("Server stopped.");
         }
     }
+
 }

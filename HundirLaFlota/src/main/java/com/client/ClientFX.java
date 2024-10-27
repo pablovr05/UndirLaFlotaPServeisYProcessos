@@ -28,4 +28,9 @@ public class ClientFX {
     public void setSelectedPlayerName(String selectedPlayerName) {
         this.selectedPlayerName = selectedPlayerName;
     }
+
+    @Override
+    public String toString() {
+        return "Jugador con nombre: " + nombre + " Socket: " + clienteWebSocket + " Jugador seleccionado: " + selectedPlayerName;
+    }
 }
