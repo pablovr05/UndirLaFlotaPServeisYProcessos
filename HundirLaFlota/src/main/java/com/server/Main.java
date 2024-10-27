@@ -332,7 +332,7 @@ public class Main extends WebSocketServer {
 
     public static void addShipsToGrid() {
         // Add objects
-        String name0 = "O0";
+        String name0 = "00";
         JSONObject obj0 = new JSONObject();
         obj0.put("objectId", name0);
         obj0.put("x", 450);
@@ -341,7 +341,7 @@ public class Main extends WebSocketServer {
         obj0.put("rows", 1);
         selectableObjects.put(name0, obj0);
 
-        String name1 = "O1";
+        String name1 = "01";
         JSONObject obj1 = new JSONObject();
         obj1.put("objectId", name1);
         obj1.put("x", 410);
