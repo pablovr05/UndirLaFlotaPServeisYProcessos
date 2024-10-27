@@ -121,6 +121,9 @@ public class ControllerConnect implements Initializable {
                             String enemyName = obj.getString("enemyName");
                             System.out.println("Combate aceptado"); 
                             System.out.println("Inicio de combate contra: " + enemyName); 
+                            
+                            UtilsViews.cambiarFrame("uri");
+                            
                         }
                     }
                 }
