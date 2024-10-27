@@ -55,6 +55,9 @@ public class ControllerPlay implements Initializable {
         canvas.setOnMouseDragged(this::onMouseDragged);
         canvas.setOnMouseReleased(this::onMouseReleased);
 
+        canvas.setWidth(1000);
+        canvas.setHeight(1000);
+
         // Define grid
         grid = new PlayGrid(100, 100, 60, 10, 10);
 
@@ -284,7 +287,6 @@ public class ControllerPlay implements Initializable {
     // Draw game to canvas
     public void draw() {
 
-        // Clean drawing area
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // Draw colored 'over' cells
@@ -331,9 +333,12 @@ public class ControllerPlay implements Initializable {
 
         // Draw FPS if needed
         if (showFPS) { animationTimer.drawFPS(gc); }   
+        System.out.println(4);
+        
     }
 
     public void drawGrid() {
+        System.out.println(2);
         gc.setStroke(Color.BLACK);
 
         for (int row = 0; row < grid.getRows(); row++) {
@@ -360,6 +365,7 @@ public class ControllerPlay implements Initializable {
                 }
             }
         }
+        System.out.println(3);
     }
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
