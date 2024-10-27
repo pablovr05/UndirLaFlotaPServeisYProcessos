@@ -1,6 +1,7 @@
 package com.server;
 
 import com.client.ClientFX;
+import com.client.ControllerConnect;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
@@ -26,8 +27,11 @@ public class Main extends WebSocketServer {
 
     private List<ClientFX> clients; // Lista de clientes conectados
 
+    private Map<String, JSONObject> clientMousePositions = new HashMap<>();
     private static Map<String, JSONObject> selectableObjects = new HashMap<>();
     private static Map<String, Map<String, JSONObject>> clientSelectableObjects;
+
+
 
     public Main(InetSocketAddress address) {
         super(address);
@@ -61,6 +65,13 @@ public class Main extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         JSONObject obj = new JSONObject(message);
+        String clientId = null;
+        for (ClientFX cliente : clients) {
+            if (cliente.getClienteWebSocket() == conn) {
+                clientId = cliente.getNombre();
+                break;
+            }
+        }
 
         // Verificar si el mensaje tiene un tipo
         if (obj.has("type")) {
@@ -82,12 +93,14 @@ public class Main extends WebSocketServer {
                     // Enviar lista actualizada de clientes a todos los clientes conectados
                     sendClientsList();
                     break;
+
                 case "clientMouseMoving":
                     // Manejar el movimiento del mouse del cliente
+                    String objectId = obj.getString("objectId");
+                    clientSelectableObjects.get(clientId).put(objectId, obj);
+                    sendServerSelectableObjects(conn);
                     break;
-                case "clientSelectableObjectMoving":
-                    // Manejar el movimiento de objetos seleccionables del cliente
-                    break;
+
                 case "playerAccepted":
                     String player = obj.getString("player");
                     String selectingPlayer = obj.getString("selectingPlayer");
