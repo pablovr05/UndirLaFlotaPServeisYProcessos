@@ -1,4 +1,4 @@
-package com.client;
+package com.server;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
