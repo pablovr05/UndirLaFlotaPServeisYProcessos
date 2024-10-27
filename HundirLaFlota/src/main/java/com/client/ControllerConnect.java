@@ -127,7 +127,6 @@ public class ControllerConnect implements Initializable {
 
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
-                            System.out.println("GRID DE BARCOS CARGADOS EN EL CLIENTE");
                         } 
                     }
                 }

@@ -94,11 +94,20 @@ public class Main extends WebSocketServer {
                     sendClientsList();
                     break;
 
-                case "clientMouseMoving":
-                    // Manejar el movimiento del mouse del cliente
+                case "clientSelectableObjectMoving":
                     String objectId = obj.getString("objectId");
                     clientSelectableObjects.get(clientId).put(objectId, obj);
                     sendServerSelectableObjects(conn);
+                    break;
+
+                case "clientMouseMoving":
+                    // Manejar el movimiento del mouse del cliente
+                    clientMousePositions.put(clientId, obj);
+                    JSONObject rst0 = new JSONObject();
+                    rst0.put("type", "serverMouseMoving");
+                    rst0.put("positions", clientMousePositions);
+                    // Usar broadcastMessage para enviar a todos los clientes
+                    broadcastMessage(rst0.toString(), conn);
                     break;
 
                 case "playerAccepted":
@@ -181,6 +190,23 @@ public class Main extends WebSocketServer {
             }
         }
     }
+
+    private void broadcastMessage(String message, WebSocket sender) {
+        for (ClientFX client : clients) {
+            WebSocket conn = client.getClienteWebSocket(); // Obtén la conexión WebSocket del cliente
+            if (conn != sender) { // Evita enviar el mensaje al remitente
+                try {
+                    conn.send(message); // Envía el mensaje
+                } catch (WebsocketNotConnectedException e) {
+                    System.out.println("Cliente " + client.getNombre() + " no conectado.");
+                    // Elimina el cliente de la lista si ya no está conectado
+                    clients.remove(client);
+                } catch (Exception e) {
+                    e.printStackTrace(); // Manejo de excepciones genéricas
+                }
+            }
+        }
+    }    
 
     private void sendClientsList() {
         // Crear un JSON con la lista de nombres de clientes
