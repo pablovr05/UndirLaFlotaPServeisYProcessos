@@ -2,8 +2,6 @@ package com.server;
 
 import com.client.ClientFX;
 
-import javafx.fxml.JavaFXBuilderFactory;
-
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ClientHandshake;

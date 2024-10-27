@@ -8,7 +8,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 

@@ -7,7 +7,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
-import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
@@ -122,12 +121,12 @@ public class ControllerConnect implements Initializable {
                             System.out.println("Combate aceptado"); 
                             System.out.println("Inicio de combate contra: " + enemyName); 
                             
-                            UtilsViews.cambiarFrame("uri");
+                            UtilsViews.cambiarFrame("/assets/viewPlay.fxml");
                             
                         }
                     }
                 }
-
+                
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
                     System.out.println("Conexión cerrada: " + reason);
