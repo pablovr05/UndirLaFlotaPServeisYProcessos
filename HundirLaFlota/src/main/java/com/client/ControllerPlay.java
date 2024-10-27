@@ -40,13 +40,20 @@ public class ControllerPlay implements Initializable {
     public static Map<String, JSONObject> selectableObjects = new HashMap<>();
     private String selectedObject = "";
 
+    public static ControllerPlay instance;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
+        instance = this;
+
+        System.out.println("CARGO");
+
         this.gc = canvas.getGraphicsContext2D();
         
         // Establecer el tamaño del canvas fijo
-        canvas.setWidth(365);
-        canvas.setHeight(365);
+        canvas.setWidth(550);
+        canvas.setHeight(375);
 
         // Configurar los listeners
         // El tamaño del canvas no debe cambiar al redimensionar la ventana

@@ -20,6 +20,7 @@ import java.util.List;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main extends WebSocketServer {
 
@@ -31,6 +32,7 @@ public class Main extends WebSocketServer {
     public Main(InetSocketAddress address) {
         super(address);
         clients = new ArrayList<>();
+        clientSelectableObjects = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -70,6 +72,13 @@ public class Main extends WebSocketServer {
                     ClientFX newClient = new ClientFX(clientName, conn);
                     clients.add(newClient);
                     System.out.println("Nombre del cliente establecido: " + clientName);
+
+                    clientSelectableObjects.put(clientName, new HashMap<>());
+
+                    for (String ship : selectableObjects.keySet()) {
+                        clientSelectableObjects.get(clientName).put(ship, selectableObjects.get(ship));
+                    }
+
                     // Enviar lista actualizada de clientes a todos los clientes conectados
                     sendClientsList();
                     break;
@@ -108,24 +117,44 @@ public class Main extends WebSocketServer {
                         }
                     }
 
-                    System.out.println(1);
-
                     for (ClientFX cliente : clients) {
                         System.out.println(cliente);
                     }
-
-                    System.out.println(2);
 
                     if (clienteSeleccionado != null) {
                         System.out.println("Cliente " + clienteSeleccionando.getNombre() + " ha seleccionado a " + clienteSeleccionado.getNombre());
                         if (checkMutualSelection(clienteSeleccionando, clienteSeleccionado)) {
                             if (sendMatchConfirmedMessages(clienteSeleccionando, clienteSeleccionado)) {
                                 System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionando.getNombre());
+
+                                WebSocket socketIdClienteSeleccionado = clienteSeleccionado.getClienteWebSocket();
+
+                                new Thread(() -> {
+                                    try {
+                                        Thread.sleep(50);
+                                        sendServerSelectableObjects(socketIdClienteSeleccionado);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }).start();
+
                             } else {
                                 System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionando.getNombre());
                             }
                             if (sendMatchConfirmedMessages(clienteSeleccionado, clienteSeleccionando)) {
                                 System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionado.getNombre());
+
+                                WebSocket socketIdClienteSeleccionando = clienteSeleccionando.getClienteWebSocket();
+
+                                new Thread(() -> {
+                                    try {
+                                        Thread.sleep(50);
+                                        sendServerSelectableObjects(socketIdClienteSeleccionando);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }).start(); // Iniciar el nuevo hilo
+
                             } else {
                                 System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionado.getNombre());
                             }
@@ -161,6 +190,36 @@ public class Main extends WebSocketServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void sendServerSelectableObjects(WebSocket conn) {
+        // Create a JSON object to hold the response
+        JSONObject rst1 = new JSONObject();
+        
+        // Retrieve the client name associated with the WebSocket connection
+        ClientFX client = null;
+        for (ClientFX cliente : clients) {
+            if (cliente.getClienteWebSocket().equals(conn)) {
+                client = cliente;
+                break;
+            }
+        }
+    
+        // If client is found, put the selectable objects into the response
+        if (client != null) {
+            String clientName = client.getNombre();
+            rst1.put("type", "serverSelectableObjects");
+            rst1.put("selectableObjects", clientSelectableObjects.get(clientName));
+    
+            try {
+                // Send the JSON response back to the client
+                conn.send(rst1.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Client not found for connection: " + conn);
         }
     }
 
@@ -212,6 +271,8 @@ public class Main extends WebSocketServer {
         LineReader reader = LineReaderBuilder.builder().build();
         System.out.println("Server running. Type 'exit' to gracefully stop it.");
 
+        addShipsToGrid();
+
         try {
             while (true) {
                 String line = reader.readLine("> ");
@@ -235,8 +296,8 @@ public class Main extends WebSocketServer {
         String name0 = "O0";
         JSONObject obj0 = new JSONObject();
         obj0.put("objectId", name0);
-        obj0.put("x", 650);
-        obj0.put("y", 150);
+        obj0.put("x", 450);
+        obj0.put("y", 20);
         obj0.put("cols", 1);
         obj0.put("rows", 1);
         selectableObjects.put(name0, obj0);
@@ -244,8 +305,8 @@ public class Main extends WebSocketServer {
         String name1 = "O1";
         JSONObject obj1 = new JSONObject();
         obj1.put("objectId", name1);
-        obj1.put("x", 700);
-        obj1.put("y", 150);
+        obj1.put("x", 410);
+        obj1.put("y", 20);
         obj1.put("cols", 1);
         obj1.put("rows", 3);
         selectableObjects.put(name1, obj1);
@@ -253,8 +314,8 @@ public class Main extends WebSocketServer {
         String name2 = "02";
         JSONObject obj2 = new JSONObject();
         obj2.put("objectId", name2);
-        obj2.put("x", 750);
-        obj2.put("y", 150);
+        obj2.put("x", 450);
+        obj2.put("y", 125);
         obj2.put("cols", 1);
         obj2.put("rows", 4);
         selectableObjects.put(name2, obj2);
@@ -262,8 +323,8 @@ public class Main extends WebSocketServer {
         String name3 = "03";
         JSONObject obj3 = new JSONObject();
         obj3.put("objectId", name3);
-        obj3.put("x", 650); // X - Y posicion dibujo inicial
-        obj3.put("y", 200);
+        obj3.put("x", 410); // X - Y posicion dibujo inicial
+        obj3.put("y", 125);
         obj3.put("cols", 1);  // Girar cols y rows para girar el barco
         obj3.put("rows", 6);
         selectableObjects.put(name3, obj3);

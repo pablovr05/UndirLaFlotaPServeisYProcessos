@@ -116,14 +116,19 @@ public class ControllerConnect implements Initializable {
                             Platform.runLater(() -> {
                                 ControllerMatchmaking.instance.updatePlayerList(clientNames);
                             });
+
                         } else if ("matchConfirm".equals(type)) {
                             String enemyName = obj.getString("enemyName");
                             System.out.println("Combate aceptado"); 
                             System.out.println("Inicio de combate contra: " + enemyName); 
-                            
-                            UtilsViews.cambiarFrame("/assets/viewPlay.fxml");
-                            
-                        }
+                            System.out.println(0);
+                            UtilsViews.cambiarFrame("/assets/viewPlay.fxml"); 
+                            System.out.println(1);
+
+                        } else if ("serverSelectableObjects".equals(type)) {
+                            ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
+                            System.out.println("GRID DE BARCOS CARGADOS EN EL CLIENTE");
+                        } 
                     }
                 }
                 
