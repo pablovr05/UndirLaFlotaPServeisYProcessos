@@ -183,7 +183,7 @@ public class ControllerMatch implements Initializable {
     
         // Dibujar la celda resaltada en rosa
         if (highlightedCol >= 0 && highlightedRow >= 0) {
-            gcAttack.setFill(Color.DARKBLUE);
+            gcAttack.setFill(Color.BLUE);
             gcAttack.fillRect(attackGrid.getCellX(highlightedCol), attackGrid.getCellY(highlightedRow), attackGrid.getCellSize(), attackGrid.getCellSize());
         }
     
@@ -199,7 +199,7 @@ public class ControllerMatch implements Initializable {
                 // Comprobar si la posición está dentro de los límites de la cuadrícula
                 if (row >= 0 && col >= 0) {
                     if ("A".equals(clientId)) { // Cliente local
-                        gcAttack.setFill(Color.DARKBLUE); // Color para la cuadrícula de ataque del usuario
+                        gcAttack.setFill(Color.LIGHTBLUE); // Color para la cuadrícula de ataque del usuario
                         gcAttack.fillRect(attackGrid.getCellX(col), attackGrid.getCellY(row), attackGrid.getCellSize(), attackGrid.getCellSize());
                     } else { // Cliente enemigo
                         gcDefense.setFill(Color.PINK); // Color para la cuadrícula de defensa del enemigo
@@ -220,7 +220,7 @@ public class ControllerMatch implements Initializable {
                 gcAttack.setFill(Color.BLUE); // Color para el cursor del usuario local
                 gcAttack.fillOval(mouseX - 5, mouseY - 5, 10, 10);
             } else { // Enemigo
-                gcDefense.setFill(Color.GREEN); // Color para el cursor del enemigo
+                gcDefense.setFill(Color.RED); // Color para el cursor del enemigo
                 gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
             }
         }
