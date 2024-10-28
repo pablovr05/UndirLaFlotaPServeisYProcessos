@@ -1,20 +1,24 @@
 package com.server;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Barco {
-    private String nombre;
-    private int tamaño;
-    private int fila;
-    private int columna;
-    private boolean esHorizontal;
+    private String nombre; // Nombre del barco (clave del JSON)
+    private int tamaño;    // Tamaño del barco basado en occupiedCells
+    private int fila;      // Coordenada fila
+    private int columna;   // Coordenada columna
+    private boolean esHorizontal; // Indicador de orientación del barco
 
-    public Barco(JSONObject jsonBarco) {
-        this.nombre = jsonBarco.getString("nombre");
-        this.tamaño = jsonBarco.getInt("tamaño");
-        this.fila = jsonBarco.getInt("fila");
-        this.columna = jsonBarco.getInt("columna");
-        this.esHorizontal = jsonBarco.getBoolean("esHorizontal");
+    public Barco(String nombre, JSONObject jsonBarco) {
+        this.nombre = nombre; // Guardar la clave como nombre
+        this.tamaño = jsonBarco.getJSONArray("occupiedCells").length(); // Número de celdas ocupadas
+        this.esHorizontal = !jsonBarco.getBoolean("isVertical"); // Se obtiene de "isVertical"
+
+        // Obtener la primera posición ocupada para establecer fila y columna
+        JSONObject primeraCelda = jsonBarco.getJSONArray("occupiedCells").getJSONObject(0);
+        this.fila = primeraCelda.getInt("row");
+        this.columna = primeraCelda.getInt("col");
     }
 
     public String getNombre() {
@@ -37,19 +41,15 @@ public class Barco {
         return esHorizontal;
     }
 
-    public void setEsHorizontal(boolean esHorizontal) {
-        this.esHorizontal = esHorizontal;
-    }
-
     public boolean estaHundido(int[][] grid) {
         for (int i = 0; i < tamaño; i++) {
             int filaActual = fila;
             int columnaActual = columna;
 
             if (esHorizontal) {
-                columnaActual += i;
+                columnaActual += i; // Si es horizontal, incrementa la columna
             } else {
-                filaActual += i;
+                filaActual += i; // Si es vertical, incrementa la fila
             }
 
             // Verificamos si cada parte del barco ha sido golpeada (valor 2)

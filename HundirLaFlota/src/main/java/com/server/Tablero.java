@@ -16,14 +16,11 @@ public class Tablero {
     }
 
     public void cargarBarcosDesdeJSON(JSONObject jsonTablero) {
-        JSONArray jsonBarcos = jsonTablero.getJSONArray("barcos");
-
-        for (int i = 0; i < jsonBarcos.length(); i++) {
-            JSONObject jsonBarco = jsonBarcos.getJSONObject(i);
-            Barco barco = new Barco(jsonBarco);
-
-            System.out.println(barco);
-
+        // Iterar sobre las claves del objeto JSON para crear los barcos
+        for (String clave : jsonTablero.keySet()) {
+            JSONObject jsonBarco = jsonTablero.getJSONObject(clave);
+            Barco barco = new Barco(clave, jsonBarco); // Pasar la clave como nombre
+    
             barcos.add(barco);
             colocarBarcoEnTablero(barco);
         }

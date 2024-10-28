@@ -262,13 +262,13 @@ public class Main extends WebSocketServer {
                         // Iterate through the ships
                         tableroJugador.cargarBarcosDesdeJSON(barcosDelJugador);
 
-                        tableroJugador.mostrarTablero();
+                        infoTableros(tableroJugador, nombreJugador);
 
                         usersBoats.put(nombreJugador, tableroJugador);
-                        System.out.println(usersBoats);
                     } else {
                         System.out.println("ID de cliente no encontrado para recibir barcos.");
                     }
+
                     break;      
             }
         }
@@ -428,6 +428,11 @@ public class Main extends WebSocketServer {
         } finally {
             System.out.println("Server stopped.");
         }
+    }
+
+    private synchronized void infoTableros(Tablero tableroX, String nombreJugador) {
+        System.out.println("Información del Tablero del Jugador :" + nombreJugador);
+        tableroX.mostrarTablero(); // Muestra el tablero del jugador X
     }
 
     public static void addShipsToGrid() {
