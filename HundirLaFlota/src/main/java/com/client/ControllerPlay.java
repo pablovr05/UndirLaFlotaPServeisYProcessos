@@ -17,6 +17,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 public class ControllerPlay implements Initializable {
@@ -29,17 +30,18 @@ public class ControllerPlay implements Initializable {
     private Canvas defenseCanvas;
     @FXML
     private Button buttonReady = new Button();
+    @FXML
+    private Pane overlayPane;
+
     private GraphicsContext gc;
     private Boolean showFPS = false;
     private Boolean playingMatch = false;
-    private double oldPositionX, oldPositionY;
 
     private PlayTimer animationTimer;
     private PlayGrid grid;
 
     public Map<String, JSONObject> clientMousePositions = new HashMap<>();
     private Boolean mouseDragging = false;
-    private double mouseOffsetX, mouseOffsetY;
 
     public static Map<String, JSONObject> selectableObjects = new HashMap<>();
     private String selectedObject = "";
@@ -64,6 +66,8 @@ public class ControllerPlay implements Initializable {
         boatPositions.put("01", new double[]{410, 20});
         boatPositions.put("02", new double[]{450, 125});
         boatPositions.put("03", new double[]{410, 125});
+
+        removeOverlay();
 
         // Configurar el evento de clic para que el canvas obtenga el foco
         canvas.setOnMouseClicked(event -> canvas.requestFocus());
@@ -377,15 +381,6 @@ public class ControllerPlay implements Initializable {
             drawSelectableObject(objectId, selectableObject);
         }
     
-        // Dibuja los círculos del ratón si es necesario
-        if (playingMatch) {
-            for (String clientId : clientMousePositions.keySet()) {
-                JSONObject position = clientMousePositions.get(clientId);
-                gc.setFill("A".equals(clientId) ? Color.BLUE : Color.GREEN);
-                gc.fillOval(position.getInt("x") - 5, position.getInt("y") - 5, 10, 10);
-            }
-        }
-    
         // Dibuja FPS si es necesario
         if (showFPS) {
             animationTimer.drawFPS(gc);
@@ -489,9 +484,20 @@ public class ControllerPlay implements Initializable {
         if(playingMatch){
             playingMatch = false;
             buttonReady.setText("Ready");
+            removeOverlay();
         } else {
             playingMatch = true;
             buttonReady.setText("Not Ready");
+            createOverlay();
         }
+    }
+
+    private void createOverlay() {
+        overlayPane.setMouseTransparent(false); // Habilitar el pane superpuesto para capturar eventos
+        overlayPane.setVisible(true); // Hacerlo visible
+    }
+
+    private void removeOverlay() {
+        overlayPane.setVisible(false); // Ocultar el pane
     }
 }
