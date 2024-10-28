@@ -184,7 +184,7 @@ public class Main extends WebSocketServer {
                     }
 
                     break;  
-                    case "playerReady":
+                case "playerReady":
                     String playerReady = obj.getString("name");
                     String socketIdReady = obj.getString("socketId");
                     String enemyNameReady = obj.optString("enemyName", null); // Permitir `null` si falta `enemyName`
@@ -269,7 +269,10 @@ public class Main extends WebSocketServer {
                         System.out.println("ID de cliente no encontrado para recibir barcos.");
                     }
 
-                    break;      
+                    break;  
+                case "mouseMoved":
+                    System.out.println("MOUSE MOVED MESSAGE");
+                    broadcastMessage(obj.toString(), conn); // Envía a todos menos al remitente
             }
         }
     }
