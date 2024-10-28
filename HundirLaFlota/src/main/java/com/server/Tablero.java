@@ -22,6 +22,8 @@ public class Tablero {
             JSONObject jsonBarco = jsonBarcos.getJSONObject(i);
             Barco barco = new Barco(jsonBarco);
 
+            System.out.println(barco);
+
             barcos.add(barco);
             colocarBarcoEnTablero(barco);
         }

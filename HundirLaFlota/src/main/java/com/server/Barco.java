@@ -59,4 +59,9 @@ public class Barco {
         }
         return true; // Todas las partes del barco fueron golpeadas
     }
+
+    @Override
+    public String toString() {
+        return "Barco: " + nombre + " Tamaño: " + tamaño + " Fila: " + fila + " Columna: " + columna + " EsHorizontal: " + esHorizontal;
+    }
 }

@@ -255,19 +255,15 @@ public class Main extends WebSocketServer {
                     JSONObject barcosDelJugador = obj.getJSONObject("ships");
                     String nombreJugador = obj.getString("playerName");
                     
-                    if (clientId != null) {
+                    if (nombreJugador != null) {
                         System.out.println("Barcos de " + clientId + " recibidos: " + barcosDelJugador.toString());
                         Tablero tableroJugador = new Tablero(10); // Initialize player's board
                     
                         // Iterate through the ships
-                        for (String key : barcosDelJugador.keySet()) {
-                            JSONObject jsonBarco = barcosDelJugador.getJSONObject(key);
-                            Barco barco = new Barco(jsonBarco, 10);
-                            
-                            // Place the ship on the grid
-                            tableroJugador.placeShip(barco);
-                        }
-                        // Store the tableroJugador for the client (if needed)
+                        tableroJugador.cargarBarcosDesdeJSON(barcosDelJugador);
+
+                        tableroJugador.mostrarTablero();
+
                         usersBoats.put(nombreJugador, tableroJugador);
                         System.out.println(usersBoats);
                     } else {
