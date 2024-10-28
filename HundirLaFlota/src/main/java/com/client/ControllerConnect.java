@@ -121,9 +121,7 @@ public class ControllerConnect implements Initializable {
                             String enemyName = obj.getString("enemyName");
                             System.out.println("Combate aceptado"); 
                             System.out.println("Inicio de combate contra: " + enemyName); 
-                            System.out.println(0);
                             UtilsViews.cambiarFrame("/assets/viewPlay.fxml"); 
-                            System.out.println(1);
 
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));

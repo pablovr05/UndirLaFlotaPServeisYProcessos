@@ -1,7 +1,9 @@
 package com.client;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -12,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -40,20 +44,29 @@ public class ControllerPlay implements Initializable {
     public static Map<String, JSONObject> selectableObjects = new HashMap<>();
     private String selectedObject = "";
 
+    private Map<String, List<int[]>> occupiedPositions = new HashMap<>();
+
+    private Map<String, double[]> boatPositions = new HashMap<>();
+
     public static ControllerPlay instance;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
         instance = this;
-
-        System.out.println("CARGO");
 
         this.gc = canvas.getGraphicsContext2D();
         
         // Establecer el tamaño del canvas fijo
         canvas.setWidth(550);
         canvas.setHeight(375);
+
+        boatPositions.put("00", new double[]{450, 20});
+        boatPositions.put("01", new double[]{410, 20});
+        boatPositions.put("02", new double[]{450, 125});
+        boatPositions.put("03", new double[]{410, 125});
+
+        // Configurar el evento de clic para que el canvas obtenga el foco
+        canvas.setOnMouseClicked(event -> canvas.requestFocus());
 
         // Configurar los listeners
         // El tamaño del canvas no debe cambiar al redimensionar la ventana
@@ -65,6 +78,9 @@ public class ControllerPlay implements Initializable {
         canvas.setOnMousePressed(this::onMousePressed);
         canvas.setOnMouseDragged(this::onMouseDragged);
         canvas.setOnMouseReleased(this::onMouseReleased);
+        
+        // Configurar el manejador de eventos de teclado para rotar el objeto
+        canvas.setOnKeyPressed(this::onKeyPressed);
 
         // Definir la rejilla
         grid = new PlayGrid(30, 30, 30, 10, 10);  // Asegúrate de que estos valores sean correctos para tu rejilla
@@ -72,6 +88,16 @@ public class ControllerPlay implements Initializable {
         // Iniciar el temporizador de animación
         animationTimer = new PlayTimer(this::run, this::draw, 0);
         start();
+    }
+
+    private void onKeyPressed(KeyEvent event) {
+        if (!selectedObject.isEmpty() && event.getCode() == KeyCode.R) {
+            // Alternar la orientación
+            JSONObject obj = selectableObjects.get(selectedObject);
+            boolean isVertical = obj.optBoolean("isVertical", true); // Valor predeterminado: true (horizontal)
+            obj.put("isVertical", !isVertical); // Cambiar la orientación
+            System.out.println(selectedObject + " ahora es " + (isVertical ? "vertical" : "horizontal"));
+        }
     }
 
 
@@ -105,8 +131,8 @@ public class ControllerPlay implements Initializable {
             newPosition.put("col", grid.getCol(mouseX));
             newPosition.put("row", grid.getRow(mouseY));
         } else {
-            newPosition.put("col", -1);
-            newPosition.put("row", -1);
+            newPosition.put("col", 2);
+            newPosition.put("row", 2);
         }
 
         clientMousePositions.put(ControllerConnect.nombre, newPosition);
@@ -121,142 +147,184 @@ public class ControllerPlay implements Initializable {
     }
 
     private void onMousePressed(MouseEvent event) {
-
         double mouseX = event.getX();
         double mouseY = event.getY();
-
+    
         selectedObject = "";
         mouseDragging = false;
-
+    
         for (String objectId : selectableObjects.keySet()) {
             JSONObject obj = selectableObjects.get(objectId);
             int objX = obj.getInt("x");
             int objY = obj.getInt("y");
             int cols = obj.getInt("cols");
             int rows = obj.getInt("rows");
-
-            if (isPositionInsideObject(mouseX, mouseY, objX, objY,  cols, rows)) {
+            boolean isVertical = obj.optBoolean("isVertical", true);
+    
+            if (isPositionInsideObject(mouseX, mouseY, objX, objY, cols, rows, obj)) {
                 selectedObject = objectId;
-                System.out.println("Barco " + selectedObject + " clickeado2");
+                System.out.println("Barco " + selectedObject + " clickeado");
                 mouseDragging = true;
-                mouseOffsetX = event.getX() - objX;
-                mouseOffsetY = event.getY() - objY;
-                oldPositionX = objX;
-                oldPositionY = objY;
                 break;
             }
         }
     }
+    
 
     private void onMouseDragged(MouseEvent event) {
         if (mouseDragging) {
+            // Actualizar temporalmente la posición del barco con las coordenadas del ratón
             JSONObject obj = selectableObjects.get(selectedObject);
-            double objX = event.getX() - mouseOffsetX;
-            double objY = event.getY() - mouseOffsetY;
-            
-            obj.put("x", objX);
-            obj.put("y", objY);
-            obj.put("col", grid.getCol(objX));
-            obj.put("row", grid.getRow(objY));
-
-            JSONObject msgObj = selectableObjects.get(selectedObject);
-            msgObj.put("type", "clientSelectableObjectMoving");
-            msgObj.put("objectId", obj.getString("objectId"));
-        
-            if (ControllerConnect.clienteWebSocket != null) {
-                ControllerConnect.clienteWebSocket.send(msgObj.toString());
-            }
+            obj.put("x", event.getX());
+            obj.put("y", event.getY());
         }
-        setOnMouseMoved(event);
     }
 
     private void onMouseReleased(MouseEvent event) {
-        if (!selectedObject.isEmpty()) {
-            JSONObject obj = selectableObjects.get(selectedObject);
-            int objCol = obj.getInt("col");
-            int objRow = obj.getInt("row");
+    if (!selectedObject.isEmpty()) {
+        JSONObject obj = selectableObjects.get(selectedObject);
+        
+        // Obtener el tamaño del barco en celdas
+        int cols = obj.getInt("cols");
+        int rows = obj.getInt("rows");
 
-            int objHeight = obj.getInt("rows");
-            int objWide = obj.getInt("cols");
+        // Verificar la orientación
+        boolean isVertical = obj.optBoolean("isVertical", true);
+        if (!isVertical) {
+            // Intercambiar columnas y filas si es vertical
+            int temp = cols;
+            cols = rows;
+            rows = temp;
+        }
 
-            int objX = obj.getInt("x");
-            int objY = obj.getInt("y");
+        // Obtener la posición de la esquina superior izquierda del barco en píxeles
+        double mouseX = event.getX();
+        double mouseY = event.getY();
 
+        // Obtener la columna y fila de la cuadrícula donde se colocará la esquina superior izquierda del barco
+        int startCol = grid.getCol(mouseX);
+        int startRow = grid.getRow(mouseY);
 
-            double mouseX = event.getX();
-            double mouseY = event.getY();
+        // Verificar si el barco cabe dentro de los límites de la cuadrícula
+        if (startCol >= 0 && startRow >= 0 && startCol + cols <= grid.getCols() && startRow + rows <= grid.getRows()) {
+            // Verificar si el barco colisiona con otros barcos
+            
+            if (!checkCollision(startCol, startRow, cols, rows, isVertical)) {
+                // Actualizar la posición del barco en píxeles a la cuadrícula (esquina superior izquierda)
+                obj.put("x", grid.getCellX(startCol));
+                obj.put("y", grid.getCellY(startRow));
 
-            int bottomHeight = objHeight + objCol - 1;
-            int bottomWide = objWide + objRow - 1;
-
-            if (objCol != -1 && objRow != -1) {
-                int newPositionX = grid.getCellX(objCol);
-                int newPositionY = grid.getCellY(objRow);
-
-                if (oldPositionX != newPositionX || oldPositionY != newPositionY) {
-                    // Si no esta en la misma posicion y no sobresale del grid
-                    if (bottomHeight < 10 && bottomWide < 10) {
-                        // Comprobar si no hay otro barco ocupando la misma posición
-                        boolean canMove = true;
-                        for (String objectId : selectableObjects.keySet()) {
-                            JSONObject otherObj = selectableObjects.get(objectId);
-                            if (!objectId.equals(selectedObject)) {
-                                int otherObjX = otherObj.getInt("x");
-                                int otherObjY = otherObj.getInt("y");
-                                int otherObjCols = otherObj.getInt("cols");
-                                int otherObjRows = otherObj.getInt("rows");
-
-                                if (isPositionInsideObject(newPositionX, newPositionY, otherObjX, otherObjY, otherObjCols, otherObjRows) ||
-                                    isPositionInsideObject(newPositionX, newPositionY, objX, objY, objWide, objHeight) ||
-                                    isPositionInsideObject(objX, objY, otherObjX, otherObjY, otherObjCols, otherObjRows)) {
-                                    canMove = false;
-                                }
-                            }
-                        }
-                        if (canMove) {
-                            obj.put("x", newPositionX);
-                            obj.put("y", newPositionY);
-                            System.out.println("Se ha movido el barco");
-                        } else {
-                            // Return to old position if out of grid
-                            obj.put("x", oldPositionX);
-                            obj.put("y", oldPositionY);
-                            System.out.println("No se puede poner un barco encima de otro");
-                        }
-                    } else {
-                        System.out.println("Parte del barco sobresale de la cuadricula, no se puede girar.");
-                    }
-                } else {
-                    if (bottomHeight < 10 && bottomWide < 10) {
-                        System.out.println("Barco girado");
-                        obj.put("x", newPositionX);
-                        obj.put("y", newPositionY);
-                        obj.put("cols", objHeight);
-                        obj.put("rows", objWide);
-                    } else {
-                        System.out.println("Parte del barco sobresale de la cuadricula, no se puede girar.");
+                // Almacenar las posiciones ocupadas por este barco
+                List<int[]> positions = new ArrayList<>();
+                for (int row = startRow; row < startRow + rows; row++) {
+                    for (int col = startCol; col < startCol + cols; col++) {
+                        positions.add(new int[]{col, row});
                     }
                 }
+                occupiedPositions.put(selectedObject, positions);
+
+                // Imprimir todas las celdas que el barco ocupa
+                System.out.println("Celdas ocupadas por el barco:");
+                for (int[] pos : positions) {
+                    System.out.println("Celda: (" + pos[0] + ", " + pos[1] + ")");
+                }
             } else {
-                // Return to old position if out of grid
-                obj.put("x", oldPositionX);
-                obj.put("y", oldPositionY);
-                System.out.println("El barco está fuera de la cuadrícula y ha sido devuelto a su posición anterior");
+                obj.put("isVertical", true); // Asegúrate de que se dibuje verticalmente
+                occupiedPositions.remove(selectedObject); // Borrar posiciones ocupadas
+                double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[]{200, 200}); // Posición por defecto
+                obj.put("x", newPosition[0]);
+                obj.put("y", newPosition[1]);
+                System.out.println("El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a (" + newPosition[0] + ", " + newPosition[1] + ").");
             }
+        } else {
+            obj.put("isVertical", true); // Asegúrate de que se dibuje verticalmente
+            occupiedPositions.remove(selectedObject); // Borrar posiciones ocupadas
+            double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[]{200, 200}); // Posición por defecto
+            obj.put("x", newPosition[0]);
+            obj.put("y", newPosition[1]);
+            System.out.println("El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a (" + newPosition[0] + ", " + newPosition[1] + ").");
+        }
 
-            JSONObject msgObj = selectableObjects.get(selectedObject);
-            msgObj.put("type", "clientSelectableObjectMoving");
-            msgObj.put("objectId", obj.getString("objectId"));
-
-            if (ControllerConnect.clienteWebSocket != null) {
-                ControllerConnect.clienteWebSocket.send(msgObj.toString());
-            }
-
-            mouseDragging = false;
-            selectedObject = "";
+        // Resetear selección y arrastre
+        mouseDragging = false;
+        selectedObject = "";
         }
     }
+    
+    private boolean checkCollision(int startCol, int startRow, int cols, int rows, boolean isVertical) {
 
+        System.out.println(occupiedPositions);
+
+        // Iterar sobre todas las posiciones ocupadas por otros barcos
+        for (String objectId : occupiedPositions.keySet()) {
+            if (objectId.equals(selectedObject)) {
+                continue; // Ignorar el barco actualmente seleccionado
+            }
+    
+            List<int[]> positions = occupiedPositions.get(objectId);
+            System.out.println("Barco " + objectId + " ocupa las siguientes posiciones:");
+    
+            // Imprimir las posiciones ocupadas
+            for (int[] pos : positions) {
+                int objCol = pos[0];
+                int objRow = pos[1];
+                System.out.printf("Posición ocupada: (%d, %d)%n", objCol, objRow);
+            }
+
+            int intHPlus = 0;
+            int intVPlus = 0;
+
+            int checkCol = 0;
+            int checkRow = 0;
+
+    
+            // Comprobar todas las celdas que ocupará el nuevo barco
+            for (int colOffset = 0; colOffset < cols; colOffset++) {
+                for (int rowOffset = 0; rowOffset < rows; rowOffset++) {
+                    // Calcular la posición que ocupa el nuevo barco
+                    checkCol = isVertical ? startCol + colOffset : startCol; // Columna a comprobar
+                    checkRow = isVertical ? startRow : startRow + rowOffset; // Fila a comprobar
+
+                    if (isVertical) {
+
+                        checkRow = checkRow + intHPlus;
+                        intHPlus++;
+
+                    } else if (!isVertical) {
+                        checkCol = checkCol + intVPlus;
+                        intVPlus++;
+                    }
+    
+                    // Imprimir la posición del nuevo barco que se está comparando
+                    System.out.printf("Comparando posición del nuevo barco: (%d, %d)%n", checkCol, checkRow);
+    
+                    // Comparar con cada posición ocupada por otros barcos
+                    for (int[] pos : positions) {
+                        int objCol = pos[0];
+                        int objRow = pos[1];
+    
+                        // Imprimir cada comparación con las posiciones ocupadas
+                        System.out.printf("Comparando con posición ocupada: (%d, %d)%n", objCol, objRow);
+    
+                        // Verificar colisión
+                        if (isVertical) {
+                            // Comprobar si hay colisión horizontal
+                            if (checkRow == objRow && checkCol >= objCol && checkCol < objCol + cols) {
+                                return true; // Hay colisión
+                            }
+                        } else {
+                            // Comprobar si hay colisión vertical
+                            if (checkCol == objCol && checkRow >= objRow && checkRow < objRow + rows) {
+                                return true; // Hay colisión
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false; // No hay colisión
+    }
+    
     public void setPlayersMousePositions(JSONObject positions) {
         clientMousePositions.clear();
         for (String clientId : positions.keySet()) {
@@ -273,17 +341,20 @@ public class ControllerPlay implements Initializable {
         }
     }
 
-    public Boolean isPositionInsideObject(double positionX, double positionY, int objX, int objY, int cols, int rows) {
+    public Boolean isPositionInsideObject(double positionX, double positionY, int objX, int objY, int cols, int rows, JSONObject obj) {
         double cellSize = grid.getCellSize();
-        double objectWidth = cols * cellSize;
-        double objectHeight = rows * cellSize;
-
+        boolean isVertical = obj.optBoolean("isVertical", true); // Obtener la orientación del objeto
+        double objectWidth = isVertical ? cols * cellSize : rows * cellSize; // Ajustar el ancho según la orientación
+        double objectHeight = isVertical ? rows * cellSize : cols * cellSize; // Ajustar la altura según la orientación
+    
         double objectRightX = objX + objectWidth;
         double objectBottomY = objY + objectHeight;
-
-        return positionX >= (double) objX && positionX < objectRightX &&
-               positionY >= (double) objY && positionY < objectBottomY;
+    
+        return positionX >= objX && positionX < objectRightX &&
+               positionY >= objY && positionY < objectBottomY;
     }
+    
+    
 
     // Run game (and animations)
     private void run(double fps) {
@@ -354,13 +425,32 @@ public class ControllerPlay implements Initializable {
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
         double cellSize = grid.getCellSize();
-
+    
         int x = obj.getInt("x");
         int y = obj.getInt("y");
-        double width = obj.getInt("cols") * cellSize;
-        double height = obj.getInt("rows") * cellSize;
-
-        // Seleccionar un color basat en l'objectId
+        int cols = obj.getInt("cols");
+        int rows = obj.getInt("rows");
+    
+        // Verificar la orientación
+        boolean isVertical = obj.optBoolean("isVertical", true);
+        if (!isVertical) {
+            // Intercambiar el ancho y alto si es vertical
+            int temp = cols;
+            cols = rows;
+            rows = temp;
+        }
+    
+        double width = cols * cellSize;
+        double height = rows * cellSize;
+    
+        // Rotación del objeto
+        int rotation = obj.optInt("rotation", 0); // Puedes omitir esto si no necesitas una rotación
+        gc.save(); // Guarda el estado actual del contexto gráfico
+        gc.translate(x + width / 2, y + height / 2); // Mueve el origen al centro del objeto
+        gc.rotate(rotation); // Aplica la rotación si es necesaria
+        gc.translate(-width / 2, -height / 2); // Mueve de nuevo el origen al ángulo original
+    
+        // Seleccionar un color basado en el objectId
         Color color;
         switch (objectId.toLowerCase()) {
             case "red":
@@ -379,18 +469,20 @@ public class ControllerPlay implements Initializable {
                 color = Color.GRAY;
                 break;
         }
-
-        // Dibuixar el rectangle
+    
+        // Dibujar el rectángulo
         gc.setFill(color);
-        gc.fillRect(x, y, width, height);
-
-        // Dibuixar el contorn
+        gc.fillRect(0, 0, width, height);
+    
+        // Dibujar el contorno
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(x, y, width, height);
-
-        // Opcionalment, afegir text (per exemple, l'objectId)
+        gc.strokeRect(0, 0, width, height);
+    
+        // Opcionalmente, agregar texto (por ejemplo, el objectId)
         gc.setFill(Color.BLACK);
-        gc.fillText(objectId, x + 5, y + 15);
+        gc.fillText(objectId, 5, 15);
+    
+        gc.restore(); // Restaura el contexto gráfico
     }
 
     public void playerReady(){
@@ -400,31 +492,6 @@ public class ControllerPlay implements Initializable {
         } else {
             playingMatch = true;
             buttonReady.setText("Not Ready");
-        }
-    }
-
-    private void onAttackGridClicked(MouseEvent event) {
-        double mouseX = event.getX();
-        double mouseY = event.getY();
-
-        if (grid.isPositionInsideGrid(mouseX, mouseY)) {
-            int col = grid.getCol(mouseX);
-            int row = grid.getRow(mouseY);
-
-            // Send attack message to the server
-            sendAttackMessage(col, row);
-        }
-    }
-
-    private void sendAttackMessage(int col, int row) {
-        JSONObject attackMessage = new JSONObject();
-        attackMessage.put("type", "attack");
-        attackMessage.put("col", col);
-        attackMessage.put("row", row);
-        attackMessage.put("clientId", ControllerConnect.nombre);
-
-        if (ControllerConnect.clienteWebSocket != null) {
-            ControllerConnect.clienteWebSocket.send(attackMessage.toString());
         }
     }
 }

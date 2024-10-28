@@ -117,8 +117,6 @@ public class Main extends WebSocketServer {
                     String messageToDisplay = String.format("Jugador %s (socketId: %s) ha seleccionado a jugador %s", selectingPlayer, socketId, player);
                     System.out.println(messageToDisplay);
 
-                    System.out.println(-1);
-
                     ClientFX clienteSeleccionado = null;
 
                     for (ClientFX cliente : clients) {
