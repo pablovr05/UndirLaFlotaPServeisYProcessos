@@ -20,6 +20,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class ControllerPlay implements Initializable {
 
     @FXML
@@ -480,24 +484,78 @@ public class ControllerPlay implements Initializable {
         gc.restore(); // Restaura el contexto gráfico
     }
 
+    public boolean allShipsPlaced() {
+        // Recorremos todos los barcos en selectableObjects
+        for (String objectId : selectableObjects.keySet()) {
+            // Verificamos si el barco tiene posiciones en occupiedPositions
+            if (!occupiedPositions.containsKey(objectId) || occupiedPositions.get(objectId).isEmpty()) {
+                // Si algún barco no tiene posiciones, no todos los barcos están colocados
+                return false;
+            }
+        }
+        // Si todos los barcos tienen posiciones, todos los barcos están colocados
+        return true;
+    }
+    
+
     public void playerReady(){
         if(playingMatch){
             playingMatch = false;
             buttonReady.setText("Ready");
             removeOverlay();
+            ControllerConnect.instance.sendMessage("{\"type\":\"playerReady\",\"socketId\":\"" + ControllerConnect.clienteWebSocket + "\",\"name\":\"" + ControllerConnect.nombre + "\",\"enemyName\":\"" + null + "\"}");
         } else {
-            playingMatch = true;
-            buttonReady.setText("Not Ready");
-            createOverlay();
+            if (allShipsPlaced()) {
+                playingMatch = true;
+                buttonReady.setText("Not Ready");
+                createOverlay();
+                ControllerConnect.instance.sendMessage("{\"type\":\"playerReady\",\"socketId\":\"" + ControllerConnect.clienteWebSocket + "\",\"name\":\"" + ControllerConnect.nombre + "\",\"enemyName\":\"" + ControllerMatchmaking.enemyName + "\"}");   
+            } else {
+                System.out.println("Debes tener todos los barcos puestos");
+            }
         }
     }
 
     private void createOverlay() {
         overlayPane.setMouseTransparent(false); // Habilitar el pane superpuesto para capturar eventos
         overlayPane.setVisible(true); // Hacerlo visible
+
     }
 
     private void removeOverlay() {
         overlayPane.setVisible(false); // Ocultar el pane
     }
+
+    public JSONObject getAllShipsAsJSON() {
+        JSONObject allShipsJSON = new JSONObject();
+        
+        for (String objectId : selectableObjects.keySet()) {
+            JSONObject shipInfo = new JSONObject();
+            JSONObject obj = selectableObjects.get(objectId);
+            
+            // Extrae y almacena los atributos relevantes del barco
+            shipInfo.put("x", obj.getInt("x"));
+            shipInfo.put("y", obj.getInt("y"));
+            shipInfo.put("cols", obj.getInt("cols"));
+            shipInfo.put("rows", obj.getInt("rows"));
+            shipInfo.put("isVertical", obj.optBoolean("isVertical", true));
+
+            // Extrae las posiciones ocupadas por el barco en la cuadrícula
+            JSONArray occupiedCells = new JSONArray();
+            if (occupiedPositions.containsKey(objectId)) {
+                for (int[] position : occupiedPositions.get(objectId)) {
+                    JSONObject cell = new JSONObject();
+                    cell.put("col", position[0]);
+                    cell.put("row", position[1]);
+                    occupiedCells.put(cell);
+                }
+            }
+
+            shipInfo.put("occupiedCells", occupiedCells);
+            allShipsJSON.put(objectId, shipInfo);
+        }
+
+        return allShipsJSON;
+    }
+
 }

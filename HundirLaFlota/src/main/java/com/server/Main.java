@@ -1,6 +1,5 @@
 package com.server;
 
-import com.client.ClientFX;
 import com.client.ControllerConnect;
 
 import org.java_websocket.WebSocket;
@@ -31,7 +30,7 @@ public class Main extends WebSocketServer {
     private static Map<String, JSONObject> selectableObjects = new HashMap<>();
     private static Map<String, Map<String, JSONObject>> clientSelectableObjects;
 
-
+    private Map<String, Tablero> usersBoats = new HashMap<>();
 
     public Main(InetSocketAddress address) {
         super(address);
@@ -184,7 +183,97 @@ public class Main extends WebSocketServer {
                         System.out.println("Para el cliente: " + clienteSeleccionando.getNombre() + " ha seleccionado " + null);
                     }
 
-                    break;         
+                    break;  
+                    case "playerReady":
+                    String playerReady = obj.getString("name");
+                    String socketIdReady = obj.getString("socketId");
+                    String enemyNameReady = obj.optString("enemyName", null); // Permitir `null` si falta `enemyName`
+                
+                    System.out.printf("Jugador %s (socketId: %s) está listo para empezar contra %s%n", playerReady, socketIdReady, enemyNameReady);
+                
+                    ClientFX clienteUser = null;
+                    boolean exit = false;
+                
+                    // Buscar y actualizar `clienteUser`
+                    for (ClientFX cliente : clients) {
+                        if (cliente.getNombre().equals(playerReady)) {
+                            clienteUser = cliente;
+                            if (enemyNameReady == null || enemyNameReady.isEmpty()) {
+                                clienteUser.setReadyToStartAgainst(null);
+                                exit = true;
+                            } else {
+                                clienteUser.setReadyToStartAgainst(enemyNameReady); // Solo el nombre
+                            }
+                            break;
+                        }
+                    }
+                
+                    if (exit) {
+                        System.out.println("ES NULL"); // Solo se imprime si `enemyNameReady` es `null` o vacío
+                        break;
+                    }
+                
+                    // Buscar `clienteEnemy` por el nombre
+                    ClientFX clienteEnemy = null;
+                    for (ClientFX cliente : clients) {
+                        if (cliente.getNombre().equals(enemyNameReady)) {
+                            clienteEnemy = cliente;
+                            break;
+                        }
+                    }
+                
+                    if (clienteEnemy == null) {
+                        System.out.println("Oponente no encontrado.");
+                        break;
+                    }
+                
+                    // Confirmar si ambos jugadores están listos para jugar entre sí
+                    if (clienteUser.getReadyToStartAgainst().equals(clienteEnemy.getNombre()) &&
+                        clienteEnemy.getReadyToStartAgainst() != null &&
+                        clienteEnemy.getReadyToStartAgainst().equals(clienteUser.getNombre())) {
+                        System.out.println("Todo listo para empezar");
+
+
+                        if (sendReadyToStartMessage(clienteUser, clienteEnemy)) {
+                            System.out.println("Se envió el mensaje de empezar a " + clienteUser.getNombre());
+                        } else {
+                            System.out.println("Error al enviar el mensaje");
+                        }
+
+                        if (sendReadyToStartMessage(clienteEnemy, clienteUser)) {
+                            System.out.println("Se envió el mensaje de empezar a " + clienteEnemy.getNombre());
+                        } else {
+                            System.out.println("Error al enviar el mensaje"); 
+                        }  
+
+                    } else {
+                        System.out.println("Tu oponente no está listo para empezar");
+                    }
+                    break; 
+                case "playerShips":
+                    // Obtener los barcos enviados por el cliente
+                    JSONObject barcosDelJugador = obj.getJSONObject("ships");
+                    String nombreJugador = obj.getString("playerName");
+                    
+                    if (clientId != null) {
+                        System.out.println("Barcos de " + clientId + " recibidos: " + barcosDelJugador.toString());
+                        Tablero tableroJugador = new Tablero(10); // Initialize player's board
+                    
+                        // Iterate through the ships
+                        for (String key : barcosDelJugador.keySet()) {
+                            JSONObject jsonBarco = barcosDelJugador.getJSONObject(key);
+                            Barco barco = new Barco(jsonBarco, 10);
+                            
+                            // Place the ship on the grid
+                            tableroJugador.placeShip(barco);
+                        }
+                        // Store the tableroJugador for the client (if needed)
+                        usersBoats.put(nombreJugador, tableroJugador);
+                        System.out.println(usersBoats);
+                    } else {
+                        System.out.println("ID de cliente no encontrado para recibir barcos.");
+                    }
+                    break;      
             }
         }
     }
@@ -287,6 +376,23 @@ public class Main extends WebSocketServer {
     private boolean sendMatchConfirmedMessages(ClientFX clienteUsuario, ClientFX clienteEnemigo) {
         JSONObject message = new JSONObject();
         message.put("type", "matchConfirm");
+        message.put("enemyName", clienteEnemigo.getNombre());
+
+        WebSocket conn = clienteUsuario.getClienteWebSocket();
+        try {
+            conn.send(message.toString());
+            return true;
+        } catch (WebsocketNotConnectedException e) {
+            System.out.println("Cliente no conectado: " + clienteUsuario.getNombre());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean sendReadyToStartMessage(ClientFX clienteUsuario, ClientFX clienteEnemigo) {
+        JSONObject message = new JSONObject();
+        message.put("type", "readyToStart");
         message.put("enemyName", clienteEnemigo.getNombre());
 
         WebSocket conn = clienteUsuario.getClienteWebSocket();

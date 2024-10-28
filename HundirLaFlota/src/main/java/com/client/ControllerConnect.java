@@ -125,7 +125,16 @@ public class ControllerConnect implements Initializable {
 
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
-                        } 
+                        } else if ("readyToStart".equals(type)) {
+                            String enemyName = obj.getString("enemyName");
+                            System.out.println("Empezando combate contra: " + enemyName);
+                            
+                            JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
+
+                            sendShipsToServer(barcosJugador);
+
+                            //UtilsViews.cambiarFrame("uri");
+                        }
                     }
                 }
                 
@@ -153,5 +162,15 @@ public class ControllerConnect implements Initializable {
         } else {
             System.out.println("No se puede enviar el mensaje. Conexión no está abierta.");
         }
+    }
+
+    private void sendShipsToServer(JSONObject barcosJugador) {
+        // Crear el objeto JSON que incluirá los barcos
+        JSONObject mensaje = new JSONObject();
+        mensaje.put("type", "playerShips"); // Tipo de mensaje
+        mensaje.put("playerName", ControllerConnect.nombre); // Tipo de mensaje
+        mensaje.put("ships", barcosJugador); // Incluye los barcos del jugador
+    
+        ControllerConnect.clienteWebSocket.send(mensaje.toString());
     }
 }

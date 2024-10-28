@@ -31,6 +31,8 @@ public class ControllerMatchmaking implements Initializable {
 
     public static ControllerMatchmaking instance;
 
+    public static String enemyName;
+
     @FXML
     private void acceptButtonAction(ActionEvent event) {
         String selectedPlayer = objectivesName.getValue();
@@ -44,6 +46,8 @@ public class ControllerMatchmaking implements Initializable {
             ControllerConnect controllerConnect = ControllerConnect.instance;
 
             String message = String.format("{\"type\":\"playerAccepted\",\"player\":\"%s\",\"selectingPlayer\":\"%s\",\"socketId\":\"%s\"}", selectedPlayer, ControllerConnect.nombre, ControllerConnect.clienteWebSocket);
+
+            enemyName = selectedPlayer;
 
             controllerConnect.sendMessage(message);
             
