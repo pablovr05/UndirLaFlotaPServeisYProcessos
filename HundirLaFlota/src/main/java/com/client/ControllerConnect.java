@@ -40,6 +40,8 @@ public class ControllerConnect implements Initializable {
 
     public static String nombre;
 
+    public static String enemyName;
+
     public static ControllerConnect instance;
 
     @FXML
@@ -126,7 +128,7 @@ public class ControllerConnect implements Initializable {
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
                         } else if ("readyToStart".equals(type)) {
-                            String enemyName = obj.getString("enemyName");
+                            enemyName = obj.getString("enemyName");
                             System.out.println("Empezando combate contra: " + enemyName);
                             
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();

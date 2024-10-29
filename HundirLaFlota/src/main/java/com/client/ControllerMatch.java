@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javafx.scene.control.Button;
 import org.json.JSONObject;
 
 import javafx.fxml.FXML;
@@ -27,8 +26,8 @@ public class ControllerMatch implements Initializable {
     private Text textTurn;
     private GraphicsContext gcAttack, gcDefense;
 
-    private String enemyID;
-    private String playerID;
+    private String userName;
+    private String enemyName;
 
     private PlayTimer animationTimer;
     private PlayGrid attackGrid, defenseGrid;
@@ -47,6 +46,9 @@ public class ControllerMatch implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
 
         instance = this;
+
+        userName = ControllerConnect.nombre;
+        enemyName = ControllerConnect.enemyName;
 
         clientMousePositions = new HashMap<>();
 

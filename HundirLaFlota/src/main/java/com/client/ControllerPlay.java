@@ -22,7 +22,6 @@ import javafx.scene.paint.Color;
 
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ControllerPlay implements Initializable {
 
@@ -167,7 +166,6 @@ public class ControllerPlay implements Initializable {
             int objY = obj.getInt("y");
             int cols = obj.getInt("cols");
             int rows = obj.getInt("rows");
-            boolean isVertical = obj.optBoolean("isVertical", true);
     
             if (isPositionInsideObject(mouseX, mouseY, objX, objY, cols, rows, obj)) {
                 selectedObject = objectId;
