@@ -246,6 +246,8 @@ public class Main extends WebSocketServer {
                             System.out.println("Error al enviar el mensaje"); 
                         }  
 
+                        startBattle(clienteUser.getNombre(), clienteUser.getClienteWebSocket(), clienteEnemy.getNombre(), clienteEnemy.getClienteWebSocket());
+
                     } else {
                         System.out.println("Tu oponente no está listo para empezar");
                     }
@@ -494,9 +496,18 @@ public class Main extends WebSocketServer {
         if (firstTurn == 0) {
             webSocketUsuario.send(messageStart.toString());
             webSocketEnemigo.send(messageSecond.toString());
+
+            System.out.println(1);
+            System.out.println(messageStart);
+            System.out.println(messageSecond);
+
         } else {
             webSocketEnemigo.send(messageStart.toString());
             webSocketUsuario.send(messageSecond.toString(firstTurn));
-        }
+
+            System.out.println(2);
+            System.out.println(messageStart);
+            System.out.println(messageSecond);
+        }   
     }
 }
