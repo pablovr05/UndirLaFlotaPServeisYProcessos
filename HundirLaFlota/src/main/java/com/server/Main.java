@@ -271,6 +271,37 @@ public class Main extends WebSocketServer {
                     break;  
                 case "mouseMoved":
                     broadcastMessage(obj.toString(), conn); // Envía a todos menos al remitente
+                    break;
+                case "attackShip":
+                    // Obtener las coordenadas del ataque
+                    int col = obj.getInt("col");
+                    int row = obj.getInt("row");
+
+                    // Comprobar el tablero del oponente
+                    String enemyId = obj.getString("enemyId");
+                    Tablero tableroEnemigo = usersBoats.get(enemyId);
+                    boolean hit = tableroEnemigo.descubrirCelda(row, col);
+
+                    JSONObject hitMessage = new JSONObject();
+                    hitMessage.put("type", "attackResult");
+                    hitMessage.put("attacker", clientId);
+                    hitMessage.put("col", col);
+                    hitMessage.put("row", row);
+                    hitMessage.put("hit", hit);
+
+                    for (ClientFX client : clients) {
+                        if (client.getNombre().equals(enemyId) || client.getNombre().equals(clientId)) {
+                            System.out.println("Sending result");
+                            WebSocket conn2 = client.getClienteWebSocket();
+                            try {
+                                conn2.send(hitMessage.toString());
+                            } catch (WebsocketNotConnectedException e) {
+                                System.out.println("Cliente no conectado: " + client.getNombre());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }                    }
+                    break;
             }
         }
     }

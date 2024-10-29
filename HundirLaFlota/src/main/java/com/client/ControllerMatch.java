@@ -52,6 +52,8 @@ public class ControllerMatch implements Initializable {
 
         selectableObjects = ControllerPlay.instance.getAllShipsAsJSON();
 
+        playerID = ControllerConnect.nombre;
+        enemyID = ControllerConnect.nombreEnemigo;
         // Get drawing context
         this.gcAttack = attackCanvas.getGraphicsContext2D();
         this.gcDefense = defenseCanvas.getGraphicsContext2D();
@@ -115,23 +117,21 @@ public class ControllerMatch implements Initializable {
             newPosition.put("row", -1);
         }
         
-        newPosition.put("clientId", ControllerConnect.nombre);
+        newPosition.put("clientId", playerID);
         
         // Enviar la posición al servidor
         sendPositionToServer(newPosition);
         
         // Mensaje de depuración
-        System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
+        //System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
     }
-    
-    
 
     private void onMousePressed(MouseEvent event) {
 
         double mouseX = event.getX();
         double mouseY = event.getY();
 
-        selectedObject = "";
+        /*selectedObject = "";
 
         for (String objectId : selectableObjects.keySet()) {
             JSONObject obj = (JSONObject) selectableObjects.get(objectId);
@@ -142,10 +142,10 @@ public class ControllerMatch implements Initializable {
 
             if (isPositionInsideObject(mouseX, mouseY, objX, objY,  cols, rows)) {
                 selectedObject = objectId;
-                System.out.println("Barco " + selectedObject + " clickeado2");
+                //System.out.println("Barco " + selectedObject + " clickeado2");
                 break;
             }
-        }
+        }*/
     }
 
     private void onMouseDragged(MouseEvent event) {
@@ -156,9 +156,12 @@ public class ControllerMatch implements Initializable {
         double mouseX = event.getX();
         double mouseY = event.getY();
 
-        if (attackGrid.isPositionInsideGrid(mouseX, mouseY)) {
+        int col = attackGrid.getCol(mouseX);
+        int row = attackGrid.getRow(mouseY);
 
-            sendAttackMessage(mouseX, mouseY);
+        if (col != -1 && row != -1) {
+            System.out.println("Atacando a la celda " + col + ", " + row);
+            sendAttackMessage(col, row);
         }
     }
 
@@ -237,18 +240,6 @@ public class ControllerMatch implements Initializable {
         }
 
     }
-    
-    
-    
-    
-    public void updateGrid(int col, int row, Color color, PlayGrid grid, GraphicsContext gc) {
-        double cellSize = grid.getCellSize();
-        double x = grid.getStartX() + col * cellSize;
-        double y = grid.getStartY() + row * cellSize;
-
-        gc.setFill(color);
-        gc.fillRect(x, y, cellSize, cellSize);
-    }
 
     public void drawGrid() {
         gcDefense.setStroke(Color.DARKRED);
@@ -286,11 +277,12 @@ public class ControllerMatch implements Initializable {
     }
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
+
         double cellSize = defenseGrid.getCellSize();
-    
+/*
         System.out.println("Object ID: " + objectId);
         System.out.println("Object Data: " + obj);
-    
+*/
         // Determine the position based on available keys
         double x, y;
     
@@ -314,11 +306,11 @@ public class ControllerMatch implements Initializable {
         double height = obj.optInt("rows", 1) * cellSize;
 
         if (!obj.getBoolean("isVertical")) {
-            System.out.println("ES HORIZONTAL");
+            //System.out.println("ES HORIZONTAL");
                 width = height;
                 height = cellSize;
         } else {
-            System.out.println("ES VERTICAL");
+            //System.out.println("ES VERTICAL");
         }
     
         // Select a color based on the objectId
@@ -343,7 +335,7 @@ public class ControllerMatch implements Initializable {
             }
         }
     
-        System.out.println("(" + x + "," + y + ")" + width + " " + height);
+        //System.out.println("(" + x + "," + y + ")" + width + " " + height);
     
         // Draw the rectangle
         gcDefense.setFill(color);
@@ -354,21 +346,7 @@ public class ControllerMatch implements Initializable {
         gcDefense.strokeRect(x, y, width, height);
     }
     
-    private void sendAttackMessage(double mouseX, double mouseY) {
-        JSONObject attackMessage = new JSONObject();
-        double cellSize = attackGrid.getCellSize();
-
-        attackMessage.put("type", "attack");
-        attackMessage.put("mouseX", mouseX);
-        attackMessage.put("mouseY", mouseY);
-        attackMessage.put("cellsize", cellSize);
-
-        if (ControllerConnect.clienteWebSocket != null) {
-            ControllerConnect.clienteWebSocket.send(attackMessage.toString());
-        }
-    }
-
-    private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
+     private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
         // Obtener el tamaño de la celda del grid
         double cellSize = attackGrid.getCellSize(); // Asumiendo que estás usando el grid de ataque
     
@@ -401,5 +379,50 @@ public class ControllerMatch implements Initializable {
 
         // Actualizar la posición en el mapa
         instance.clientMousePositions.put(clientId, position);
+    }
+
+    private void sendAttackMessage(int col, int row) {
+        JSONObject attackMessage = new JSONObject();
+        attackMessage.put("type", "attackShip");
+        attackMessage.put("enemyId", enemyID);
+        attackMessage.put("col", col);
+        attackMessage.put("row", row);
+
+        if (ControllerConnect.clienteWebSocket != null) {
+            ControllerConnect.clienteWebSocket.send(attackMessage.toString());
+        }
+    }
+
+    public void paintEnemyGrid(int col, int row, boolean hit) {
+/*
+        int col = attackGrid.getCol(positionX);
+        int row = attackGrid.getRow(positionY);
+*/
+        if (hit) {
+            updateGrid(col, row, Color.RED, attackGrid, instance.gcAttack);
+        } else {
+            updateGrid(col, row, Color.BLUE, attackGrid, instance.gcAttack);
+        }
+    }
+
+    public void paintPlayerGrid(int col, int row, boolean hit) {
+        /*int col = defenseGrid.getCol(positionX);
+        int row = defenseGrid.getRow(positionY);*/
+        System.out.println("Pintando celdas");
+        if (hit) {
+            updateGrid(col, row, Color.RED, defenseGrid, instance.gcDefense);
+        } else {
+            updateGrid(col, row, Color.BLUE, defenseGrid, instance.gcDefense);
+        }
+    }
+
+    public void updateGrid(int col, int row, Color color, PlayGrid grid, GraphicsContext gc) {
+        System.out.println("Actualizando celdas");
+        double cellSize = grid.getCellSize();
+        double x = grid.getStartX() + col * cellSize;
+        double y = grid.getStartY() + row * cellSize;
+
+        gc.setFill(color);
+        gc.fillRect(x, y, cellSize, cellSize);
     }
 }

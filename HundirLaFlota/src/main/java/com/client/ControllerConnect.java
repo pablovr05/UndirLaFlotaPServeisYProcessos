@@ -38,7 +38,7 @@ public class ControllerConnect implements Initializable {
 
     public static WebSocketClient clienteWebSocket;
 
-    public static String nombre;
+    public static String nombre, nombreEnemigo;
 
     public static ControllerConnect instance;
 
@@ -126,8 +126,8 @@ public class ControllerConnect implements Initializable {
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
                         } else if ("readyToStart".equals(type)) {
-                            String enemyName = obj.getString("enemyName");
-                            System.out.println("Empezando combate contra: " + enemyName);
+                            nombreEnemigo = obj.getString("enemyName");
+                            System.out.println("Empezando combate contra: " + nombreEnemigo);
                             
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
 
@@ -140,10 +140,29 @@ public class ControllerConnect implements Initializable {
                             double mouseY = obj.getDouble("y");
                             String clientId = obj.getString("clientId");
 
-                            System.out.println("Se actualiza el cursor en el cliente del enemigo");
+                            //System.out.println("Se actualiza el cursor en el cliente del enemigo");
                             
                             // Actualizar la posición del cursor en la interfaz del cliente enemigo
                             ControllerMatch.updateCursorPosition(mouseX, mouseY, clientId);
+                        } else if ("attackResult".equals(type)){
+                            int col = obj.getInt("col");
+                            int row = obj.getInt("row");
+                            boolean hit = obj.getBoolean("hit");
+                            String attackerId = obj.getString("attacker");
+
+                            if (nombre.equals(attackerId)) {
+                                ControllerMatch.instance.paintEnemyGrid(col, row, hit);
+                                System.out.println("Ataque realizado en: " + col + ", " + row);
+                            } else {
+                                ControllerMatch.instance.paintPlayerGrid(col, row, hit);
+                                System.out.println("Ataque recibido en: " + col + ", " + row);
+                            }
+
+
+                        } else if ("gameOver".equals(type)) {
+                            String winner = obj.getString("winner");
+                            System.out.println("Juego terminado. Ganador: " + winner);
+                            UtilsViews.cambiarFrame("/assets/layout_matchmaking.fxml");
                         }
                     }
                 }
