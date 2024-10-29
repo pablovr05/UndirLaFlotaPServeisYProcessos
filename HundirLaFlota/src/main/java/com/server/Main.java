@@ -271,7 +271,6 @@ public class Main extends WebSocketServer {
 
                     break;  
                 case "mouseMoved":
-                    System.out.println("MOUSE MOVED MESSAGE");
                     broadcastMessage(obj.toString(), conn); // Envía a todos menos al remitente
             }
         }

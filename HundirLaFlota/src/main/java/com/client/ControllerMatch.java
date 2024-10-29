@@ -38,7 +38,7 @@ public class ControllerMatch implements Initializable {
     private int highlightedCol = -1; // Columna de la celda seleccionada
     private int highlightedRow = -1; // Fila de la celda seleccionada
 
-    public Map<String, JSONObject> selectableObjects = new HashMap<>();
+    public JSONObject selectableObjects;
     private String selectedObject = "";
 
     public static ControllerMatch instance;
@@ -49,6 +49,8 @@ public class ControllerMatch implements Initializable {
         instance = this;
 
         clientMousePositions = new HashMap<>();
+
+        selectableObjects = ControllerPlay.instance.getAllShipsAsJSON();
 
         // Get drawing context
         this.gcAttack = attackCanvas.getGraphicsContext2D();
@@ -132,7 +134,7 @@ public class ControllerMatch implements Initializable {
         selectedObject = "";
 
         for (String objectId : selectableObjects.keySet()) {
-            JSONObject obj = selectableObjects.get(objectId);
+            JSONObject obj = (JSONObject) selectableObjects.get(objectId);
             int objX = obj.getInt("x");
             int objY = obj.getInt("y");
             int cols = obj.getInt("cols");
@@ -208,6 +210,15 @@ public class ControllerMatch implements Initializable {
                 }
             }
         }
+
+        // Dibujar las cuadrículas
+        drawGrid();
+
+        // Dibujar objetos seleccionables
+        for (String objectId : selectableObjects.keySet()) {
+            JSONObject selectableObject = (JSONObject) selectableObjects.get(objectId);
+            drawSelectableObject(objectId, selectableObject);
+        }
     
         // Dibujar el cursor en cada cuadrícula
         for (String clientId : clientMousePositions.keySet()) {
@@ -224,15 +235,7 @@ public class ControllerMatch implements Initializable {
                 gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
             }
         }
-    
-        // Dibujar las cuadrículas
-        drawGrid();
-    
-        // Dibujar objetos seleccionables
-        for (String objectId : selectableObjects.keySet()) {
-            JSONObject selectableObject = selectableObjects.get(objectId);
-            drawSelectableObject(objectId, selectableObject);
-        }
+
     }
     
     
@@ -283,18 +286,42 @@ public class ControllerMatch implements Initializable {
     }
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
-
         double cellSize = defenseGrid.getCellSize();
+    
+        System.out.println("Object ID: " + objectId);
+        System.out.println("Object Data: " + obj);
+    
+        // Determine the position based on available keys
+        double x, y;
+    
+        if (obj.has("col") && obj.has("row")) {
+            // Use "col" and "row" for positioning if they exist
+            int col = obj.getInt("col");
+            int row = obj.getInt("row");
+            x = defenseGrid.getStartX() + col * cellSize;
+            y = defenseGrid.getStartY() + row * cellSize;
+        } else if (obj.has("x") && obj.has("y")) {
+            // Fall back to "x" and "y" if "col" and "row" are missing
+            x = obj.getDouble("x");
+            y = obj.getDouble("y");
+        } else {
+            System.out.println("Error: Missing positioning keys for object " + objectId);
+            return;
+        }
+    
+        // Get the size using "cols" and "rows" (with defaults if missing)
+        double width = obj.optInt("cols", 1) * cellSize;
+        double height = obj.optInt("rows", 1) * cellSize;
 
-        int col = obj.getInt("col");
-        int row = obj.getInt("row");
-        double x = defenseGrid.getStartX() + col * cellSize;
-        double y = defenseGrid.getStartY() + row * cellSize;
-
-        double width = obj.getInt("cols") * cellSize;
-        double height = obj.getInt("rows") * cellSize;
-
-        // Seleccionar un color basat en l'objectId
+        if (!obj.getBoolean("isVertical")) {
+            System.out.println("ES HORIZONTAL");
+                width = height;
+                height = cellSize;
+        } else {
+            System.out.println("ES VERTICAL");
+        }
+    
+        // Select a color based on the objectId
         Color color = switch (objectId.toLowerCase()) {
             case "red" -> Color.RED;
             case "blue" -> Color.BLUE;
@@ -302,20 +329,31 @@ public class ControllerMatch implements Initializable {
             case "yellow" -> Color.YELLOW;
             default -> Color.GRAY;
         };
-
-        // Dibuixar el rectangle
+    
+        // Aplicar conversores para escalar la separación de 30pixeles a 20px
+        for (double i = x; i > 1; i -= 30) {
+            if (i != 30) {
+                x -= 10;
+            }
+        }
+    
+        for (double i = y; i > 1; i -= 30) {
+            if (i != 30) {
+                y -= 10;
+            }
+        }
+    
+        System.out.println("(" + x + "," + y + ")" + width + " " + height);
+    
+        // Draw the rectangle
         gcDefense.setFill(color);
         gcDefense.fillRect(x, y, width, height);
-
-        // Dibuixar el contorn
+    
+        // Draw the outline
         gcDefense.setStroke(Color.BLACK);
         gcDefense.strokeRect(x, y, width, height);
-
-        // Opcionalment, afegir text (per exemple, l'objectId)
-        gcDefense.setFill(Color.BLACK);
-        gcDefense.fillText(objectId, x + 5, y + 15);
     }
-
+    
     private void sendAttackMessage(double mouseX, double mouseY) {
         JSONObject attackMessage = new JSONObject();
         double cellSize = attackGrid.getCellSize();
