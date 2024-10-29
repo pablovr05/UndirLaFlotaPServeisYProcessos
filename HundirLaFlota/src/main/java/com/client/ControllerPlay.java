@@ -545,5 +545,4 @@ public class ControllerPlay implements Initializable {
 
         return allShipsJSON;
     }
-
 }

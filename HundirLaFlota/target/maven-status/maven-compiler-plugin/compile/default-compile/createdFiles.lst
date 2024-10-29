@@ -1,4 +1,5 @@
 com\client\PlayGrid.class
+com\client\ControllerMatch.class
 com\server\Main.class
 com\client\ControllerMatchmaking.class
 com\client\ControllerPlay.class

@@ -121,7 +121,7 @@ public class ControllerConnect implements Initializable {
                             String enemyName = obj.getString("enemyName");
                             System.out.println("Combate aceptado"); 
                             System.out.println("Inicio de combate contra: " + enemyName); 
-                            UtilsViews.cambiarFrame("/assets/viewPlay.fxml"); 
+                            UtilsViews.cambiarFrame("/assets/layout_viewplay.fxml"); 
 
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
@@ -132,7 +132,18 @@ public class ControllerConnect implements Initializable {
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
 
                             sendShipsToServer(barcosJugador);
-                            UtilsViews.cambiarFrame("/assets/viewMatch.fxml");
+
+                            UtilsViews.cambiarFrame("/assets/layout_match.fxml");
+                        } else if ("mouseMoved".equals(type)) {
+
+                            double mouseX = obj.getDouble("x");
+                            double mouseY = obj.getDouble("y");
+                            String clientId = obj.getString("clientId");
+
+                            System.out.println("Se actualiza el cursor en el cliente del enemigo");
+                            
+                            // Actualizar la posición del cursor en la interfaz del cliente enemigo
+                            ControllerMatch.updateCursorPosition(mouseX, mouseY, clientId);
                         }
                     }
                 }
