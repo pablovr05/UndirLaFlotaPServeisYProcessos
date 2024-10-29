@@ -295,6 +295,7 @@ public class Main extends WebSocketServer {
                     // Comprobar el tablero del oponente
                     String enemyId = obj.getString("enemyId");
                     Tablero tableroEnemigo = usersBoats.get(enemyId);
+                    Tablero tableroUsuario = usersBoats.get(clientId);
                     boolean hit = tableroEnemigo.descubrirCelda(row, col);
 
                     JSONObject hitMessage = new JSONObject();
@@ -304,17 +305,35 @@ public class Main extends WebSocketServer {
                     hitMessage.put("row", row);
                     hitMessage.put("hit", hit);
 
+                    // Cambiar de turno
+                    JSONObject nextTurnMessage = new JSONObject();
+                    nextTurnMessage.put("type", "playTurn");
+                    nextTurnMessage.put("userName", enemyId);
+
+                    // Check game over
+                    JSONObject gameOverMessage = new JSONObject();
+                    boolean gameOver = tableroEnemigo.batallaPerdida();
+                    if (gameOver) {
+                        gameOverMessage.put("type", "gameOver");
+                        gameOverMessage.put("winner", clientId);
+                    }
+
                     for (ClientFX client : clients) {
                         if (client.getNombre().equals(enemyId) || client.getNombre().equals(clientId)) {
                             WebSocket conn2 = client.getClienteWebSocket();
                             try {
                                 conn2.send(hitMessage.toString());
+                                conn2.send(nextTurnMessage.toString());
+                                if (gameOver) {
+                                    conn2.send(gameOverMessage.toString());
+                                }
                             } catch (WebsocketNotConnectedException e) {
                                 System.out.println("Cliente no conectado: " + client.getNombre());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        }                    }
+                        }
+                    }
                     break;
             }
         }

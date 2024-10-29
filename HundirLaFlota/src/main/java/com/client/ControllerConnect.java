@@ -4,7 +4,9 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 
 import org.java_websocket.client.WebSocketClient;
@@ -163,15 +165,44 @@ public class ControllerConnect implements Initializable {
                         } else if ("gameOver".equals(type)) {
                             String winner = obj.getString("winner");
                             System.out.println("Juego terminado. Ganador: " + winner);
-                            UtilsViews.cambiarFrame("/assets/layout_matchmaking.fxml");
+
+                            // Crear dialog con el nombre del ganador
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.NONE);
+                                alert.setTitle("Battaalla Naval");
+                                alert.setHeaderText("Match Result");
+                                alert.setContentText("Game Over!\nThe winner is: " + winner);
+
+                                ButtonType buttonTypeOk = new ButtonType("Back to Matchmaking");
+                                alert.getButtonTypes().setAll(buttonTypeOk);
+
+                                alert.showAndWait().ifPresent(response -> {
+                                    if (response == buttonTypeOk) {
+                                        UtilsViews.cambiarFrame("/assets/layout_matchmaking.fxml");
+                                    }
+                                });
+                            });
                         } else if ("userTurn".equals(type)) {
                             System.out.println("ES TU TURNO");
                             ControllerMatch.instance.removeOverlay();
                             ControllerMatch.instance.textTurn.setText("Es tu turno");
+
                         } else if ("enemyTurn".equals(type)) {
                             System.out.println("ESPERA A TU RIVAL");
                             ControllerMatch.instance.textTurn.setText("Turno del rival");
                             ControllerMatch.instance.createOverlay();
+
+                        } else if ("playTurn".equals(type)) {
+                            String userTurn = obj.getString("userName");
+                            if (nombre.equals(userTurn)) {
+                                System.out.println("ES TU TURNO");
+                                ControllerMatch.instance.removeOverlay();
+                                ControllerMatch.instance.textTurn.setText("Es tu turno");
+                            } else {
+                                System.out.println("ESPERA A TU RIVAL");
+                                ControllerMatch.instance.textTurn.setText("Turno del rival");
+                                ControllerMatch.instance.createOverlay();
+                            }
                         }
                     }
                 }
