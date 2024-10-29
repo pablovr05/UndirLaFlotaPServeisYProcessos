@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import java.util.Random;
+
 public class Main extends WebSocketServer {
 
     private List<ClientFX> clients; // Lista de clientes conectados
@@ -263,6 +265,7 @@ public class Main extends WebSocketServer {
                         infoTableros(tableroJugador, nombreJugador);
 
                         usersBoats.put(nombreJugador, tableroJugador);
+
                     } else {
                         System.out.println("ID de cliente no encontrado para recibir barcos.");
                     }
@@ -472,5 +475,28 @@ public class Main extends WebSocketServer {
         obj3.put("cols", 1);  // Girar cols y rows para girar el barco
         obj3.put("rows", 6);
         selectableObjects.put(name3, obj3);
+    }
+
+    public void startBattle(String usuario, WebSocket webSocketUsuario, String enemigo,WebSocket webSocketEnemigo) {
+        Random random = new Random();
+        int firstTurn = random.nextInt(2);
+
+        JSONObject messageStart = new JSONObject();
+        messageStart.put("type", "startMessage");
+        messageStart.put("userName", usuario);
+        messageStart.put("enemyName", enemigo);
+
+        JSONObject messageSecond = new JSONObject();
+        messageSecond.put("type", "secondMessage");
+        messageSecond.put("userName", usuario);
+        messageSecond.put("enemyName", enemigo);
+
+        if (firstTurn == 0) {
+            webSocketUsuario.send(messageStart.toString());
+            webSocketEnemigo.send(messageSecond.toString());
+        } else {
+            webSocketEnemigo.send(messageStart.toString());
+            webSocketUsuario.send(messageSecond.toString(firstTurn));
+        }
     }
 }
