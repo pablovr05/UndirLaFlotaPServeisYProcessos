@@ -140,23 +140,14 @@ public class ControllerMatch implements Initializable {
 
     private void onMousePressed(MouseEvent event) {
 
-        double mouseX = event.getX();
-        double mouseY = event.getY();
+        if (highlightedCol >= 0 && highlightedRow >= 0) {
+            int row = (int)((event.getX() - attackGrid.getStartX()) / attackGrid.getCellSize());
+            int col = (int)((event.getY() - attackGrid.getStartY()) / attackGrid.getCellSize());
 
-        selectedObject = "";
-
-        for (String objectId : selectableObjects.keySet()) {
-            JSONObject obj = (JSONObject) selectableObjects.get(objectId);
-            int objX = obj.getInt("x");
-            int objY = obj.getInt("y");
-            int cols = obj.getInt("cols");
-            int rows = obj.getInt("rows");
-
-            if (isPositionInsideObject(mouseX, mouseY, objX, objY,  cols, rows)) {
-                selectedObject = objectId;
-                System.out.println("Barco " + selectedObject + " clickeado2");
-                break;
+            if (userPaintBoard[row][col] == null) {
+                System.out.println("Click válido en: " + row + "," + col);
             }
+
         }
     }
 
@@ -466,5 +457,9 @@ public class ControllerMatch implements Initializable {
 
     public void removeOverlay() {
         overlayPane.setVisible(false); // Ocultar el pane
+    }
+
+    private boolean comprobarAtaqueVálido() {
+        return false;
     }
 }

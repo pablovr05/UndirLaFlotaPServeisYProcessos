@@ -193,4 +193,5 @@ public class ControllerConnect implements Initializable {
     
         ControllerConnect.clienteWebSocket.send(mensaje.toString());
     }
+
 }
