@@ -47,7 +47,7 @@ public class ControllerConnect implements Initializable {
     @FXML
     private void acceptButtonAction(ActionEvent event) {
         System.out.println("Se pulsó el botón aceptar");
-        establecerConexión();
+        establecerConexion();
     }
 
     @FXML
@@ -63,7 +63,7 @@ public class ControllerConnect implements Initializable {
         portField.setText("12345");
     }
 
-    private void establecerConexión() {
+    private void establecerConexion() {
         nombre = nameField.getText().trim();
         String ip = ipField.getText().trim();
         String portText = portField.getText().trim();
@@ -159,7 +159,6 @@ public class ControllerConnect implements Initializable {
                                 ControllerMatch.instance.paintPlayerGrid(col, row, hit);
                                 System.out.println("Ataque recibido en: " + col + ", " + row);
                             }
-
 
                         } else if ("gameOver".equals(type)) {
                             String winner = obj.getString("winner");

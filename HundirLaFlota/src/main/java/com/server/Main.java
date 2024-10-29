@@ -306,7 +306,6 @@ public class Main extends WebSocketServer {
 
                     for (ClientFX client : clients) {
                         if (client.getNombre().equals(enemyId) || client.getNombre().equals(clientId)) {
-                            System.out.println("Sending result");
                             WebSocket conn2 = client.getClienteWebSocket();
                             try {
                                 conn2.send(hitMessage.toString());

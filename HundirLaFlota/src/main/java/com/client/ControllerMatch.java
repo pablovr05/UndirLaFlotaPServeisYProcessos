@@ -68,7 +68,7 @@ public class ControllerMatch implements Initializable {
         selectableObjects = ControllerPlay.instance.getAllShipsAsJSON();
 
         playerID = ControllerConnect.nombre;
-        enemyID = ControllerConnect.nombreEnemigo;
+        enemyID = ControllerConnect.enemyName;
         // Get drawing context
         this.gcAttack = attackCanvas.getGraphicsContext2D();
         this.gcDefense = defenseCanvas.getGraphicsContext2D();
@@ -176,7 +176,9 @@ public class ControllerMatch implements Initializable {
 
         if (col != -1 && row != -1) {
             System.out.println("Atacando a la celda " + col + ", " + row);
-            sendAttackMessage(col, row);
+            if(enemyPaintBoard[col][row] == null) {
+                sendAttackMessage(col, row);
+            }
         }
     }
 
@@ -189,9 +191,7 @@ public class ControllerMatch implements Initializable {
     }
     // Run game (and animations)
     private void run(double fps) {
-
         if (animationTimer.fps < 1) { return; }
-
         // Update objects and animations here
     }
 
@@ -387,7 +387,7 @@ public class ControllerMatch implements Initializable {
                 double x = defenseGrid.getStartX() + i * cellSize;
                 double y = defenseGrid.getStartY() + j * cellSize;
                 if (userPaintBoard[i][j] == null ) {
-                    //
+                    // continue;
                 } else if (userPaintBoard[i][j]) {
                     gcDefense.setFill(Color.RED);
                     gcDefense.fillRect(x, y, cellSize, cellSize);
@@ -463,35 +463,11 @@ public class ControllerMatch implements Initializable {
     }
 
     public void paintEnemyGrid(int col, int row, boolean hit) {
-/*
-        int col = attackGrid.getCol(positionX);
-        int row = attackGrid.getRow(positionY);
-*/
-        if (hit) {
-            updateGrid(col, row, Color.RED, attackGrid, instance.gcAttack);
-        } else {
-            updateGrid(col, row, Color.BLUE, attackGrid, instance.gcAttack);
-        }
+        enemyPaintBoard[col][row] = hit;
     }
 
     public void paintPlayerGrid(int col, int row, boolean hit) {
-        /*int col = defenseGrid.getCol(positionX);
-        int row = defenseGrid.getRow(positionY);*/
-        System.out.println("Pintando celdas");
-        if (hit) {
-            updateGrid(col, row, Color.RED, defenseGrid, instance.gcDefense);
-        } else {
-            updateGrid(col, row, Color.BLUE, defenseGrid, instance.gcDefense);
-        }
+        userPaintBoard[col][row] = hit;
     }
 
-    public void updateGrid(int col, int row, Color color, PlayGrid grid, GraphicsContext gc) {
-        System.out.println("Actualizando celdas");
-        double cellSize = grid.getCellSize();
-        double x = grid.getStartX() + col * cellSize;
-        double y = grid.getStartY() + row * cellSize;
-
-        gc.setFill(color);
-        gc.fillRect(x, y, cellSize, cellSize);
-    }
 }
