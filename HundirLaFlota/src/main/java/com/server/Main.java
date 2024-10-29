@@ -1,7 +1,5 @@
 package com.server;
 
-import com.client.ControllerConnect;
-
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ClientHandshake;
@@ -21,6 +19,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.Random;
 
 public class Main extends WebSocketServer {
 
@@ -245,6 +245,20 @@ public class Main extends WebSocketServer {
                             System.out.println("Error al enviar el mensaje"); 
                         }  
 
+                        String uName = clienteUser.getNombre();
+                        WebSocket uWebSocket = clienteUser.getClienteWebSocket();
+                        String eName = clienteEnemy.getNombre();
+                        WebSocket eWebSocket = clienteEnemy.getClienteWebSocket();
+
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(50);
+                                startBattle(uName, uWebSocket, eName, eWebSocket);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }).start(); 
+
                     } else {
                         System.out.println("Tu oponente no está listo para empezar");
                     }
@@ -264,6 +278,7 @@ public class Main extends WebSocketServer {
                         infoTableros(tableroJugador, nombreJugador);
 
                         usersBoats.put(nombreJugador, tableroJugador);
+
                     } else {
                         System.out.println("ID de cliente no encontrado para recibir barcos.");
                     }
@@ -504,5 +519,37 @@ public class Main extends WebSocketServer {
         obj3.put("cols", 1);  // Girar cols y rows para girar el barco
         obj3.put("rows", 6);
         selectableObjects.put(name3, obj3);
+    }
+
+    public void startBattle(String usuario, WebSocket webSocketUsuario, String enemigo,WebSocket webSocketEnemigo) {
+        Random random = new Random();
+        int firstTurn = random.nextInt(2);
+
+        JSONObject messageStart = new JSONObject();
+        messageStart.put("type", "userTurn");
+        messageStart.put("userName", usuario);
+        messageStart.put("enemyName", enemigo);
+
+        JSONObject messageSecond = new JSONObject();
+        messageSecond.put("type", "enemyTurn");
+        messageSecond.put("userName", usuario);
+        messageSecond.put("enemyName", enemigo);
+
+        if (firstTurn == 0) {
+            webSocketUsuario.send(messageStart.toString());
+            webSocketEnemigo.send(messageSecond.toString());
+
+            System.out.println(1);
+            System.out.println(messageStart);
+            System.out.println(messageSecond);
+
+        } else {
+            webSocketEnemigo.send(messageStart.toString());
+            webSocketUsuario.send(messageSecond.toString(firstTurn));
+
+            System.out.println(2);
+            System.out.println(messageStart);
+            System.out.println(messageSecond);
+        }   
     }
 }

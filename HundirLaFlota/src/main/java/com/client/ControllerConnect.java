@@ -38,7 +38,9 @@ public class ControllerConnect implements Initializable {
 
     public static WebSocketClient clienteWebSocket;
 
-    public static String nombre, nombreEnemigo;
+    public static String nombre;
+
+    public static String enemyName;
 
     public static ControllerConnect instance;
 
@@ -126,8 +128,8 @@ public class ControllerConnect implements Initializable {
                         } else if ("serverSelectableObjects".equals(type)) {
                             ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
                         } else if ("readyToStart".equals(type)) {
-                            nombreEnemigo = obj.getString("enemyName");
-                            System.out.println("Empezando combate contra: " + nombreEnemigo);
+                            enemyName = obj.getString("enemyName");
+                            System.out.println("Empezando combate contra: " + enemyName);
                             
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
 
@@ -163,6 +165,14 @@ public class ControllerConnect implements Initializable {
                             String winner = obj.getString("winner");
                             System.out.println("Juego terminado. Ganador: " + winner);
                             UtilsViews.cambiarFrame("/assets/layout_matchmaking.fxml");
+                        } else if ("userTurn".equals(type)) {
+                            System.out.println("ES TU TURNO");
+                            ControllerMatch.instance.removeOverlay();
+                            ControllerMatch.instance.textTurn.setText("Es tu turno");
+                        } else if ("enemyTurn".equals(type)) {
+                            System.out.println("ESPERA A TU RIVAL");
+                            ControllerMatch.instance.textTurn.setText("Turno del rival");
+                            ControllerMatch.instance.createOverlay();
                         }
                     }
                 }

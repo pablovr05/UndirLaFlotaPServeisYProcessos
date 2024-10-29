@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javafx.scene.control.Button;
 import org.json.JSONObject;
 
 import javafx.fxml.FXML;
@@ -13,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -24,7 +24,9 @@ public class ControllerMatch implements Initializable {
     @FXML
     private Canvas defenseCanvas;
     @FXML
-    private Text textTurn;
+    public Text textTurn;
+    @FXML
+    private Pane overlayPane;
     private GraphicsContext gcAttack, gcDefense;
 
     private String enemyID;
@@ -43,10 +45,23 @@ public class ControllerMatch implements Initializable {
 
     public static ControllerMatch instance;
 
+    private Boolean[][] userPaintBoard;
+    private Boolean[][] enemyPaintBoard;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
         instance = this;
+
+        userPaintBoard = new Boolean[10][10];
+        enemyPaintBoard = new Boolean[10][10];
+
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                userPaintBoard[i][j] = null;
+                enemyPaintBoard[i][j] = null;
+            }
+        }
 
         clientMousePositions = new HashMap<>();
 
@@ -188,30 +203,17 @@ public class ControllerMatch implements Initializable {
     
         // Dibujar la celda resaltada en rosa
         if (highlightedCol >= 0 && highlightedRow >= 0) {
-            gcAttack.setFill(Color.BLUE);
-            gcAttack.fillRect(attackGrid.getCellX(highlightedCol), attackGrid.getCellY(highlightedRow), attackGrid.getCellSize(), attackGrid.getCellSize());
-        }
-    
-        // Dibujar celdas coloreadas para el cursor dentro de las cuadrículas
-        for (String clientId : clientMousePositions.keySet()) {
-            JSONObject position = clientMousePositions.get(clientId);
-    
-            // Verifica que "col" y "row" existen antes de acceder
-            if (position.has("col") && position.has("row")) {
-                int col = position.getInt("col");
-                int row = position.getInt("row");
-    
-                // Comprobar si la posición está dentro de los límites de la cuadrícula
-                if (row >= 0 && col >= 0) {
-                    if ("A".equals(clientId)) { // Cliente local
-                        gcAttack.setFill(Color.LIGHTBLUE); // Color para la cuadrícula de ataque del usuario
-                        gcAttack.fillRect(attackGrid.getCellX(col), attackGrid.getCellY(row), attackGrid.getCellSize(), attackGrid.getCellSize());
-                    } else { // Cliente enemigo
-                        gcDefense.setFill(Color.PINK); // Color para la cuadrícula de defensa del enemigo
-                        gcDefense.fillRect(defenseGrid.getCellX(col), defenseGrid.getCellY(row), defenseGrid.getCellSize(), defenseGrid.getCellSize());
-                    }
-                }
-            }
+            double cellX = attackGrid.getCellX(highlightedCol);
+            double cellY = attackGrid.getCellY(highlightedRow);
+            double cellSize = attackGrid.getCellSize();
+            double padding = 4;
+
+            // Configura el color de la línea (puedes cambiarlo si deseas)
+            gcAttack.setStroke(Color.RED); // Cambia el color de la "X" si lo deseas
+
+            // Dibuja la "X"
+            gcAttack.strokeLine(cellX + padding, cellY + padding, cellX + cellSize - padding, cellY + cellSize - padding);
+            gcAttack.strokeLine(cellX + cellSize - padding, cellY + padding, cellX + padding, cellY + cellSize - padding);
         }
 
         // Dibujar las cuadrículas
@@ -222,21 +224,18 @@ public class ControllerMatch implements Initializable {
             JSONObject selectableObject = (JSONObject) selectableObjects.get(objectId);
             drawSelectableObject(objectId, selectableObject);
         }
-    
+
+        doUserPaintBoard();
+        doEnemyPaintBoard();
+
         // Dibujar el cursor en cada cuadrícula
         for (String clientId : clientMousePositions.keySet()) {
             JSONObject position = clientMousePositions.get(clientId);
             double mouseX = position.getDouble("x");
             double mouseY = position.getDouble("y");
     
-            // Seleccionar el contexto y color en función del cliente
-            if ("A".equals(clientId)) { // Usuario local
-                gcAttack.setFill(Color.BLUE); // Color para el cursor del usuario local
-                gcAttack.fillOval(mouseX - 5, mouseY - 5, 10, 10);
-            } else { // Enemigo
-                gcDefense.setFill(Color.RED); // Color para el cursor del enemigo
-                gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
-            }
+            gcDefense.setFill(Color.RED);
+            gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
         }
 
     }
@@ -379,6 +378,76 @@ public class ControllerMatch implements Initializable {
 
         // Actualizar la posición en el mapa
         instance.clientMousePositions.put(clientId, position);
+    }
+
+    private void doUserPaintBoard() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                double cellSize = defenseGrid.getCellSize();
+                double x = defenseGrid.getStartX() + i * cellSize;
+                double y = defenseGrid.getStartY() + j * cellSize;
+                if (userPaintBoard[i][j] == null ) {
+                    //
+                } else if (userPaintBoard[i][j]) {
+                    gcDefense.setFill(Color.RED);
+                    gcDefense.fillRect(x, y, cellSize, cellSize);
+                } else if (!userPaintBoard[i][j]) {
+                    gcDefense.setFill(Color.LIGHTBLUE);
+                    gcDefense.fillRect(x, y, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    private void doEnemyPaintBoard() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                double cellSize = attackGrid.getCellSize();
+                double x = attackGrid.getStartX() + i * cellSize;
+                double y = attackGrid.getStartY() + j * cellSize;
+                if (enemyPaintBoard[i][j] == null ) {
+                    //
+                } else if (enemyPaintBoard[i][j]) {
+                    gcAttack.setFill(Color.RED);
+                    gcAttack.fillRect(x, y, cellSize, cellSize);
+                    gcDefense.setStroke(Color.BLACK);
+                    gcDefense.strokeRect(x, y, cellSize, cellSize);
+                } else if (!enemyPaintBoard[i][j]) {
+                    gcAttack.setFill(Color.LIGHTBLUE);
+                    gcAttack.fillRect(x, y, cellSize, cellSize);
+                    gcAttack.setStroke(Color.BLACK);
+                    gcAttack.strokeRect(x, y, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    private void changeUserPaintBoard(boolean estado, int x, int y) {
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+            userPaintBoard[x][y] = estado;
+            System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+        } else {
+            System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
+        }
+    }
+
+    private void changeEnemyPaintBoard(boolean estado, int x, int y) {
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+            enemyPaintBoard[x][y] = estado;
+            System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+        } else {
+            System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
+        }
+    }
+
+    public void createOverlay() {
+        overlayPane.setMouseTransparent(false); // Habilitar el pane superpuesto para capturar eventos
+        overlayPane.setVisible(true); // Hacerlo visible
+
+    }
+
+    public void removeOverlay() {
+        overlayPane.setVisible(false); // Ocultar el pane
     }
 
     private void sendAttackMessage(int col, int row) {
