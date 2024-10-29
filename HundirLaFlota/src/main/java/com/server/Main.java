@@ -246,7 +246,19 @@ public class Main extends WebSocketServer {
                             System.out.println("Error al enviar el mensaje"); 
                         }  
 
-                        startBattle(clienteUser.getNombre(), clienteUser.getClienteWebSocket(), clienteEnemy.getNombre(), clienteEnemy.getClienteWebSocket());
+                        String uName = clienteUser.getNombre();
+                        WebSocket uWebSocket = clienteUser.getClienteWebSocket();
+                        String eName = clienteEnemy.getNombre();
+                        WebSocket eWebSocket = clienteEnemy.getClienteWebSocket();
+
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(50);
+                                startBattle(uName, uWebSocket, eName, eWebSocket);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }).start(); 
 
                     } else {
                         System.out.println("Tu oponente no está listo para empezar");
@@ -484,12 +496,12 @@ public class Main extends WebSocketServer {
         int firstTurn = random.nextInt(2);
 
         JSONObject messageStart = new JSONObject();
-        messageStart.put("type", "startMessage");
+        messageStart.put("type", "userTurn");
         messageStart.put("userName", usuario);
         messageStart.put("enemyName", enemigo);
 
         JSONObject messageSecond = new JSONObject();
-        messageSecond.put("type", "secondMessage");
+        messageSecond.put("type", "enemyTurn");
         messageSecond.put("userName", usuario);
         messageSecond.put("enemyName", enemigo);
 

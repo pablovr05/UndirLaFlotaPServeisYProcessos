@@ -23,7 +23,7 @@ public class ControllerMatch implements Initializable {
     @FXML
     private Canvas defenseCanvas;
     @FXML
-    private Text textTurn;
+    public Text textTurn;
     private GraphicsContext gcAttack, gcDefense;
 
     private String userName;
@@ -136,7 +136,7 @@ public class ControllerMatch implements Initializable {
         sendPositionToServer(newPosition);
         
         // Mensaje de depuración
-        System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
+        //System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
     }
     
     
@@ -203,28 +203,6 @@ public class ControllerMatch implements Initializable {
             gcAttack.setFill(Color.BLUE);
             gcAttack.fillRect(attackGrid.getCellX(highlightedCol), attackGrid.getCellY(highlightedRow), attackGrid.getCellSize(), attackGrid.getCellSize());
         }
-    
-        // Dibujar celdas coloreadas para el cursor dentro de las cuadrículas
-        for (String clientId : clientMousePositions.keySet()) {
-            JSONObject position = clientMousePositions.get(clientId);
-    
-            // Verifica que "col" y "row" existen antes de acceder
-            if (position.has("col") && position.has("row")) {
-                int col = position.getInt("col");
-                int row = position.getInt("row");
-    
-                // Comprobar si la posición está dentro de los límites de la cuadrícula
-                if (row >= 0 && col >= 0) {
-                    if ("A".equals(clientId)) { // Cliente local
-                        gcAttack.setFill(Color.LIGHTBLUE); // Color para la cuadrícula de ataque del usuario
-                        gcAttack.fillRect(attackGrid.getCellX(col), attackGrid.getCellY(row), attackGrid.getCellSize(), attackGrid.getCellSize());
-                    } else { // Cliente enemigo
-                        gcDefense.setFill(Color.PINK); // Color para la cuadrícula de defensa del enemigo
-                        gcDefense.fillRect(defenseGrid.getCellX(col), defenseGrid.getCellY(row), defenseGrid.getCellSize(), defenseGrid.getCellSize());
-                    }
-                }
-            }
-        }
 
         // Dibujar las cuadrículas
         drawGrid();
@@ -238,23 +216,14 @@ public class ControllerMatch implements Initializable {
         doUserPaintBoard();
         doEnemyPaintBoard();
     
-        // Dibujar el cursor en cada cuadrícula
         for (String clientId : clientMousePositions.keySet()) {
             JSONObject position = clientMousePositions.get(clientId);
             double mouseX = position.getDouble("x");
             double mouseY = position.getDouble("y");
     
-            // Seleccionar el contexto y color en función del cliente
-            if ("A".equals(clientId)) { // Usuario local
-                gcAttack.setFill(Color.BLUE); // Color para el cursor del usuario local
-                gcAttack.fillOval(mouseX - 5, mouseY - 5, 10, 10);
-            } else { // Enemigo
-                gcDefense.setFill(Color.RED); // Color para el cursor del enemigo
-                gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
-            }
+            gcDefense.setFill(Color.RED);
+            gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
         }
-
-
 
     }
     
@@ -308,8 +277,8 @@ public class ControllerMatch implements Initializable {
     public void drawSelectableObject(String objectId, JSONObject obj) {
         double cellSize = defenseGrid.getCellSize();
     
-        System.out.println("Object ID: " + objectId);
-        System.out.println("Object Data: " + obj);
+        //System.out.println("Object ID: " + objectId);
+        //System.out.println("Object Data: " + obj);
     
         // Determine the position based on available keys
         double x, y;
@@ -334,11 +303,11 @@ public class ControllerMatch implements Initializable {
         double height = obj.optInt("rows", 1) * cellSize;
 
         if (!obj.getBoolean("isVertical")) {
-            System.out.println("ES HORIZONTAL");
+            //System.out.println("ES HORIZONTAL");
                 width = height;
                 height = cellSize;
         } else {
-            System.out.println("ES VERTICAL");
+            //System.out.println("ES VERTICAL");
         }
     
         // Select a color based on the objectId
@@ -363,7 +332,7 @@ public class ControllerMatch implements Initializable {
             }
         }
     
-        System.out.println("(" + x + "," + y + ")" + width + " " + height);
+        //System.out.println("(" + x + "," + y + ")" + width + " " + height);
     
         // Draw the rectangle
         gcDefense.setFill(color);

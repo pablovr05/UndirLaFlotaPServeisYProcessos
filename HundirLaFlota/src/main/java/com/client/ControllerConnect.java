@@ -142,10 +142,16 @@ public class ControllerConnect implements Initializable {
                             double mouseY = obj.getDouble("y");
                             String clientId = obj.getString("clientId");
 
-                            System.out.println("Se actualiza el cursor en el cliente del enemigo");
+                            //System.out.println("Se actualiza el cursor en el cliente del enemigo");
                             
                             // Actualizar la posición del cursor en la interfaz del cliente enemigo
                             ControllerMatch.updateCursorPosition(mouseX, mouseY, clientId);
+                        } else if ("userTurn".equals(type)) {
+                            System.out.println("ES TU TURNO");
+                            ControllerMatch.instance.textTurn.setText("Es tu turno");
+                        } else if ("enemyTurn".equals(type)) {
+                            System.out.println("ESPERA A TU RIVAL");
+                            ControllerMatch.instance.textTurn.setText("Turno del rival");
                         }
                     }
                 }
