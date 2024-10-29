@@ -136,8 +136,6 @@ public class ControllerMatch implements Initializable {
         //System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
     }
     
-    
-
     private void onMousePressed(MouseEvent event) {
 
         if (highlightedCol >= 0 && highlightedRow >= 0) {
@@ -146,6 +144,7 @@ public class ControllerMatch implements Initializable {
 
             if (userPaintBoard[row][col] == null) {
                 System.out.println("Click válido en: " + row + "," + col);
+                sendAttackMessage(row, col);
             }
 
         }
@@ -431,7 +430,7 @@ public class ControllerMatch implements Initializable {
         }
     }
 
-    private void changeUserPaintBoard(boolean estado, int x, int y) {
+    public void changeUserPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             userPaintBoard[x][y] = estado;
             System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
@@ -440,7 +439,7 @@ public class ControllerMatch implements Initializable {
         }
     }
 
-    private void changeEnemyPaintBoard(boolean estado, int x, int y) {
+    public void changeEnemyPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             enemyPaintBoard[x][y] = estado;
             System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
@@ -459,7 +458,15 @@ public class ControllerMatch implements Initializable {
         overlayPane.setVisible(false); // Ocultar el pane
     }
 
-    private boolean comprobarAtaqueVálido() {
-        return false;
+    private void sendAttackMessage(int col, int row) {
+        JSONObject attackMessage = new JSONObject();
+        attackMessage.put("type", "attackShip");
+        attackMessage.put("enemyId", ControllerConnect.enemyName);
+        attackMessage.put("col", col);
+        attackMessage.put("row", row);
+
+        if (ControllerConnect.clienteWebSocket != null) {
+            ControllerConnect.clienteWebSocket.send(attackMessage.toString());
+        }
     }
 }
