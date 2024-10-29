@@ -76,5 +76,6 @@
             </GridPane>
          </children>
       </GridPane>
+      <Pane fx:id="overlayPane" layoutX="325.0" layoutY="180.0" opacity="0.15" prefHeight="250.0" prefWidth="250.0" style="-fx-background-color: black;" />
    </children>
 </AnchorPane>

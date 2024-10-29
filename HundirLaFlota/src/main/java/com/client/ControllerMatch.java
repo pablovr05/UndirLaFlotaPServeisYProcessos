@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -24,10 +25,9 @@ public class ControllerMatch implements Initializable {
     private Canvas defenseCanvas;
     @FXML
     public Text textTurn;
+    @FXML
+    private Pane overlayPane;
     private GraphicsContext gcAttack, gcDefense;
-
-    private String userName;
-    private String enemyName;
 
     private PlayTimer animationTimer;
     private PlayGrid attackGrid, defenseGrid;
@@ -49,9 +49,6 @@ public class ControllerMatch implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
 
         instance = this;
-
-        userName = ControllerConnect.nombre;
-        enemyName = ControllerConnect.enemyName;
 
         userPaintBoard = new Boolean[10][10];
         enemyPaintBoard = new Boolean[10][10];
@@ -198,11 +195,20 @@ public class ControllerMatch implements Initializable {
         gcAttack.clearRect(0, 0, attackCanvas.getWidth(), attackCanvas.getHeight());
         gcDefense.clearRect(0, 0, defenseCanvas.getWidth(), defenseCanvas.getHeight());
     
-        // Dibujar la celda resaltada en rosa
         if (highlightedCol >= 0 && highlightedRow >= 0) {
-            gcAttack.setFill(Color.BLUE);
-            gcAttack.fillRect(attackGrid.getCellX(highlightedCol), attackGrid.getCellY(highlightedRow), attackGrid.getCellSize(), attackGrid.getCellSize());
+            double cellX = attackGrid.getCellX(highlightedCol);
+            double cellY = attackGrid.getCellY(highlightedRow);
+            double cellSize = attackGrid.getCellSize();
+            double padding = 4;
+        
+            // Configura el color de la línea (puedes cambiarlo si deseas)
+            gcAttack.setStroke(Color.RED); // Cambia el color de la "X" si lo deseas
+        
+            // Dibuja la "X"
+            gcAttack.strokeLine(cellX + padding, cellY + padding, cellX + cellSize - padding, cellY + cellSize - padding);
+            gcAttack.strokeLine(cellX + cellSize - padding, cellY + padding, cellX + padding, cellY + cellSize - padding);
         }
+        
 
         // Dibujar las cuadrículas
         drawGrid();
@@ -450,5 +456,15 @@ public class ControllerMatch implements Initializable {
         } else {
             System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
         }
+    }
+
+    public void createOverlay() {
+        overlayPane.setMouseTransparent(false); // Habilitar el pane superpuesto para capturar eventos
+        overlayPane.setVisible(true); // Hacerlo visible
+
+    }
+
+    public void removeOverlay() {
+        overlayPane.setVisible(false); // Ocultar el pane
     }
 }

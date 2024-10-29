@@ -148,10 +148,12 @@ public class ControllerConnect implements Initializable {
                             ControllerMatch.updateCursorPosition(mouseX, mouseY, clientId);
                         } else if ("userTurn".equals(type)) {
                             System.out.println("ES TU TURNO");
+                            ControllerMatch.instance.removeOverlay();
                             ControllerMatch.instance.textTurn.setText("Es tu turno");
                         } else if ("enemyTurn".equals(type)) {
                             System.out.println("ESPERA A TU RIVAL");
                             ControllerMatch.instance.textTurn.setText("Turno del rival");
+                            ControllerMatch.instance.createOverlay();
                         }
                     }
                 }
