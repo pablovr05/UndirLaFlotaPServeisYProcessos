@@ -233,7 +233,6 @@ public class Main extends WebSocketServer {
                         clienteEnemy.getReadyToStartAgainst().equals(clienteUser.getNombre())) {
                         System.out.println("Todo listo para empezar");
 
-
                         if (sendReadyToStartMessage(clienteUser, clienteEnemy)) {
                             System.out.println("Se envió el mensaje de empezar a " + clienteUser.getNombre());
                         } else {

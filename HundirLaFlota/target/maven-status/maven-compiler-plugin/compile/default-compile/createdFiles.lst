@@ -7,6 +7,7 @@ com\client\Main.class
 com\client\UtilsViews.class
 com\server\Tablero.class
 com\client\ControllerConnect$1.class
+com\client\CtrlMatch.class
 com\client\PlayTimer.class
 com\server\Barco.class
 com\server\ClientFX.class

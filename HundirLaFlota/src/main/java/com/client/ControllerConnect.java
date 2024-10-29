@@ -132,8 +132,7 @@ public class ControllerConnect implements Initializable {
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
 
                             sendShipsToServer(barcosJugador);
-
-                            //UtilsViews.cambiarFrame("uri");
+                            UtilsViews.cambiarFrame("/assets/viewMatch.fxml");
                         }
                     }
                 }

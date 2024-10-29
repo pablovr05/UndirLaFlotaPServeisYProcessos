@@ -29,10 +29,6 @@ public class ControllerPlay implements Initializable {
     @FXML
     private Canvas canvas;
     @FXML
-    private Canvas attackCanvas;
-    @FXML
-    private Canvas defenseCanvas;
-    @FXML
     private Button buttonReady = new Button();
     @FXML
     private Pane overlayPane;
@@ -51,7 +47,6 @@ public class ControllerPlay implements Initializable {
     private String selectedObject = "";
 
     private Map<String, List<int[]>> occupiedPositions = new HashMap<>();
-
     private Map<String, double[]> boatPositions = new HashMap<>();
 
     public static ControllerPlay instance;
@@ -349,6 +344,10 @@ public class ControllerPlay implements Initializable {
         }
     }
 
+    public Map<String, JSONObject> getSelectableObjects() {
+        return selectableObjects;
+    }
+
     public Boolean isPositionInsideObject(double positionX, double positionY, int objX, int objY, int cols, int rows, JSONObject obj) {
         double cellSize = grid.getCellSize();
         boolean isVertical = obj.optBoolean("isVertical", true); // Obtener la orientación del objeto
@@ -450,25 +449,14 @@ public class ControllerPlay implements Initializable {
         gc.translate(-width / 2, -height / 2); // Mueve de nuevo el origen al ángulo original
     
         // Seleccionar un color basado en el objectId
-        Color color;
-        switch (objectId.toLowerCase()) {
-            case "red":
-                color = Color.RED;
-                break;
-            case "blue":
-                color = Color.BLUE;
-                break;
-            case "green":
-                color = Color.GREEN;
-                break;
-            case "yellow":
-                color = Color.YELLOW;
-                break;
-            default:
-                color = Color.GRAY;
-                break;
-        }
-    
+        Color color = switch (objectId.toLowerCase()) {
+            case "red" -> Color.RED;
+            case "blue" -> Color.BLUE;
+            case "green" -> Color.GREEN;
+            case "yellow" -> Color.YELLOW;
+            default -> Color.GRAY;
+        };
+
         // Dibujar el rectángulo
         gc.setFill(color);
         gc.fillRect(0, 0, width, height);
