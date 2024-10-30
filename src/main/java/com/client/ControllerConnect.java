@@ -38,6 +38,9 @@ public class ControllerConnect implements Initializable {
     @FXML
     private Button acceptButton;
 
+    @FXML
+    private ChoiceBox<String> choiceBox;
+
     public static WebSocketClient clienteWebSocket;
 
     public static String nombre;
