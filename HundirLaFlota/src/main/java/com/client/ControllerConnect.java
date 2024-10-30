@@ -194,13 +194,29 @@ public class ControllerConnect implements Initializable {
                             });
                         } else if ("userTurn".equals(type)) {
                             System.out.println("ES TU TURNO");
-                            ControllerMatch.instance.removeOverlay();
-                            ControllerMatch.instance.textTurn.setText("Es tu turno");
+
+                            new Thread(() -> {
+                                try {
+                                    Thread.sleep(150);
+                                    ControllerMatch.instance.removeOverlay();
+                                    ControllerMatch.instance.textTurn.setText("Es tu turno");
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }).start();
 
                         } else if ("enemyTurn".equals(type)) {
-                            System.out.println("ESPERA A TU RIVAL");
-                            ControllerMatch.instance.textTurn.setText("Turno del rival");
-                            ControllerMatch.instance.createOverlay();
+
+                            new Thread(() -> {
+                                try {
+                                    Thread.sleep(150);
+                                    System.out.println("ESPERA A TU RIVAL");
+                                    ControllerMatch.instance.textTurn.setText("Turno del rival");
+                                    ControllerMatch.instance.createOverlay();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }).start();
 
                         } else if ("playTurn".equals(type)) {
                             String userTurn = obj.getString("userName");
