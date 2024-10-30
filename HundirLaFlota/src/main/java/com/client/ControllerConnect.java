@@ -8,6 +8,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ChoiceBox;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -37,6 +38,9 @@ public class ControllerConnect implements Initializable {
 
     @FXML
     private Button acceptButton;
+
+    @FXML
+    private ChoiceBox<String> choiceConnect;
 
     public static WebSocketClient clienteWebSocket;
 
