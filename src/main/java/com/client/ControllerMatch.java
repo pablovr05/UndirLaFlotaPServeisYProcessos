@@ -425,7 +425,7 @@ public class ControllerMatch implements Initializable {
     private void changeUserPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             userPaintBoard[x][y] = estado;
-            System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+            //System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
         } else {
             System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
         }
@@ -434,7 +434,7 @@ public class ControllerMatch implements Initializable {
     private void changeEnemyPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             enemyPaintBoard[x][y] = estado;
-            System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+            //System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
         } else {
             System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
         }

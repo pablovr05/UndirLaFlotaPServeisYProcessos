@@ -97,7 +97,7 @@ public class ControllerConnect implements Initializable {
                     // Enviar el nombre al servidor
                     sendMessage("{\"type\":\"setName\",\"name\":\"" + nombre + "\"}");
 
-                    System.out.println("Se cambia la interfaz a matchmaking");
+                    //System.out.println("Se cambia la interfaz a matchmaking");
 
                     UtilsViews.cambiarFrame("/assets/layout_matchmaking.fxml");
 
@@ -179,7 +179,7 @@ public class ControllerConnect implements Initializable {
                             // Crear dialog con el nombre del ganador
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.NONE);
-                                alert.setTitle("Battaalla Naval");
+                                alert.setTitle("Batalla Naval");
                                 alert.setHeaderText("Match Result");
                                 alert.setContentText("Game Over!\nThe winner is: " + winner);
 
