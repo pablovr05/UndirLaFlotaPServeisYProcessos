@@ -86,7 +86,7 @@ public class ControllerConnect implements Initializable {
         }
 
         // Crear la URI del WebSocket
-        String uri = "ws://" + ip + ":" + port;
+        String uri = "wss://" + ip + ":" + port;
         
         // Crear el cliente WebSocket
         try {
@@ -128,7 +128,17 @@ public class ControllerConnect implements Initializable {
                             UtilsViews.cambiarFrame("/assets/layout_viewplay.fxml"); 
 
                         } else if ("serverSelectableObjects".equals(type)) {
-                            ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
+
+                            new Thread(() -> {
+                                try {
+                                    Thread.sleep(150);
+                                    ControllerPlay.instance.setSelectableObjects(obj.getJSONObject("selectableObjects"));
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }).start();
+
+
                         } else if ("readyToStart".equals(type)) {
                             enemyName = obj.getString("enemyName");
                             System.out.println("Empezando combate contra: " + enemyName);
