@@ -61,8 +61,8 @@ public class ControllerConnect implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         instance = this;
-        ipField.setText("localhost");
-        portField.setText("12345");
+        ipField.setText("pvicenteroura.ieti.site");
+        portField.setText("443");
     }
 
     private void establecerConexion() {
