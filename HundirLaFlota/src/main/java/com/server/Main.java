@@ -233,7 +233,6 @@ public class Main extends WebSocketServer {
                         clienteEnemy.getReadyToStartAgainst().equals(clienteUser.getNombre())) {
                         System.out.println("Todo listo para empezar");
 
-
                         if (sendReadyToStartMessage(clienteUser, clienteEnemy)) {
                             System.out.println("Se envió el mensaje de empezar a " + clienteUser.getNombre());
                         } else {
@@ -289,16 +288,15 @@ public class Main extends WebSocketServer {
                     broadcastMessage(obj.toString(), conn); // Envía a todos menos al remitente
                     break;
                 case "attackShip":
+                    // Obtener las coordenadas del ataque
                     int col = obj.getInt("col");
                     int row = obj.getInt("row");
 
                     // Comprobar el tablero del oponente
                     String enemyId = obj.getString("enemyId");
                     Tablero tableroEnemigo = usersBoats.get(enemyId);
-
+                    Tablero tableroUsuario = usersBoats.get(clientId);
                     boolean hit = tableroEnemigo.descubrirCelda(row, col);
-
-                    tableroEnemigo.mostrarTablero();
 
                     JSONObject hitMessage = new JSONObject();
                     hitMessage.put("type", "attackResult");
@@ -307,20 +305,34 @@ public class Main extends WebSocketServer {
                     hitMessage.put("row", row);
                     hitMessage.put("hit", hit);
 
-                    System.out.println(hitMessage);
+                    // Cambiar de turno
+                    JSONObject nextTurnMessage = new JSONObject();
+                    nextTurnMessage.put("type", "playTurn");
+                    nextTurnMessage.put("userName", enemyId);
+
+                    // Check game over
+                    JSONObject gameOverMessage = new JSONObject();
+                    boolean gameOver = tableroEnemigo.batallaPerdida();
+                    if (gameOver) {
+                        gameOverMessage.put("type", "gameOver");
+                        gameOverMessage.put("winner", clientId);
+                    }
 
                     for (ClientFX client : clients) {
                         if (client.getNombre().equals(enemyId) || client.getNombre().equals(clientId)) {
-                            System.out.println("Sending result");
                             WebSocket conn2 = client.getClienteWebSocket();
                             try {
                                 conn2.send(hitMessage.toString());
+                                conn2.send(nextTurnMessage.toString());
+                                if (gameOver) {
+                                    conn2.send(gameOverMessage.toString());
+                                }
                             } catch (WebsocketNotConnectedException e) {
                                 System.out.println("Cliente no conectado: " + client.getNombre());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        }     
+                        }
                     }
                     break;
             }
@@ -538,8 +550,8 @@ public class Main extends WebSocketServer {
 
         JSONObject messageSecond = new JSONObject();
         messageSecond.put("type", "enemyTurn");
-        messageSecond.put("userName", enemigo);
-        messageSecond.put("enemyName", usuario);
+        messageSecond.put("userName", usuario);
+        messageSecond.put("enemyName", enemigo);
 
         if (firstTurn == 0) {
             webSocketUsuario.send(messageStart.toString());

@@ -31,6 +31,11 @@ public class Main extends Application {
         }
     }
 
+    @Override
+    public void stop() {
+        System.exit(1); // Kill all executor services
+    }
+
     public static Stage getStage() {
         return stageFX;
     }
