@@ -517,26 +517,44 @@ public class Main extends WebSocketServer {
         obj1.put("x", 410);
         obj1.put("y", 20);
         obj1.put("cols", 1);
-        obj1.put("rows", 3);
+        obj1.put("rows", 2);
         selectableObjects.put(name1, obj1);
 
         String name2 = "02";
         JSONObject obj2 = new JSONObject();
         obj2.put("objectId", name2);
-        obj2.put("x", 450);
-        obj2.put("y", 125);
+        obj2.put("x", 410);
+        obj2.put("y", 90);
         obj2.put("cols", 1);
-        obj2.put("rows", 4);
+        obj2.put("rows", 3);
         selectableObjects.put(name2, obj2);
 
         String name3 = "03";
         JSONObject obj3 = new JSONObject();
         obj3.put("objectId", name3);
-        obj3.put("x", 410); // X - Y posicion dibujo inicial
-        obj3.put("y", 125);
-        obj3.put("cols", 1);  // Girar cols y rows para girar el barco
-        obj3.put("rows", 5);
+        obj3.put("x", 450);
+        obj3.put("y", 90);
+        obj3.put("cols", 1);
+        obj3.put("rows", 3);
         selectableObjects.put(name3, obj3);
+
+        String name4 = "04";
+        JSONObject obj4 = new JSONObject();
+        obj4.put("objectId", name4);
+        obj4.put("x", 450);
+        obj4.put("y", 190);
+        obj4.put("cols", 1);
+        obj4.put("rows", 4);
+        selectableObjects.put(name4, obj4);
+
+        String name5 = "05";
+        JSONObject obj5 = new JSONObject();
+        obj5.put("objectId", name5);
+        obj5.put("x", 410); 
+        obj5.put("y", 190);
+        obj5.put("cols", 1);  
+        obj5.put("rows", 5);
+        selectableObjects.put(name5, obj5);
     }
 
     public void startBattle(String usuario, WebSocket webSocketUsuario, String enemigo,WebSocket webSocketEnemigo) {

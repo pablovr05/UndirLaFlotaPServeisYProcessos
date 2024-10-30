@@ -21,7 +21,7 @@ public class Main extends Application {
 
         stageFX.setScene(scene);
         stageFX.setResizable(true);
-        stageFX.setTitle("JavaFX App");
+        stageFX.setTitle("Batalla Naval");
         stageFX.getIcons().add(new Image("/images/UndirLaFlotaLogo.png"));
         stageFX.show();
 
