@@ -508,7 +508,7 @@ public class Main extends WebSocketServer {
         obj0.put("x", 450);
         obj0.put("y", 20);
         obj0.put("cols", 1);
-        obj0.put("rows", 1);
+        obj0.put("rows", 2);
         selectableObjects.put(name0, obj0);
 
         String name1 = "01";
@@ -535,7 +535,7 @@ public class Main extends WebSocketServer {
         obj3.put("x", 410); // X - Y posicion dibujo inicial
         obj3.put("y", 125);
         obj3.put("cols", 1);  // Girar cols y rows para girar el barco
-        obj3.put("rows", 6);
+        obj3.put("rows", 5);
         selectableObjects.put(name3, obj3);
     }
 
