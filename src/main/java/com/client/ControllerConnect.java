@@ -7,8 +7,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -40,7 +40,7 @@ public class ControllerConnect implements Initializable {
     private Button acceptButton;
 
     @FXML
-    private ChoiceBox<String> choiceBox;
+    private ComboBox<String> choiceConnect;
 
     public static WebSocketClient clienteWebSocket;
 
@@ -67,6 +67,8 @@ public class ControllerConnect implements Initializable {
         instance = this;
         ipField.setText("pvicenteroura.ieti.site");
         portField.setText("443");
+        choiceConnect.getItems().addAll("wss://", "ws://");
+        choiceConnect.setValue("wss://");
     }
 
     private void establecerConexion() {
@@ -90,7 +92,7 @@ public class ControllerConnect implements Initializable {
         }
 
         // Crear la URI del WebSocket
-        String uri = "wss://" + ip + ":" + port;
+        String uri = choiceConnect.getValue() + ip + ":" + port;
         
         // Crear el cliente WebSocket
         try {

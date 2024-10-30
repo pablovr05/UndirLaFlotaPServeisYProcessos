@@ -62,8 +62,10 @@ public class ControllerPlay implements Initializable {
 
         boatPositions.put("00", new double[]{450, 20});
         boatPositions.put("01", new double[]{410, 20});
-        boatPositions.put("02", new double[]{450, 125});
-        boatPositions.put("03", new double[]{410, 125});
+        boatPositions.put("02", new double[]{410, 90});
+        boatPositions.put("03", new double[]{450, 90});
+        boatPositions.put("04", new double[]{450, 190});
+        boatPositions.put("05", new double[]{410, 190});
 
         removeOverlay();
 

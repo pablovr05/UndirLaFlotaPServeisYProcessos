@@ -2,7 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -66,7 +66,7 @@
             </Text>
             <HBox alignment="CENTER" prefHeight="33.0" prefWidth="402.0">
                <children>
-                  <ChoiceBox fx:id="choiceConnect" prefHeight="26.0" prefWidth="86.0" />
+                  <ComboBox fx:id="choiceConnect" prefHeight="26.0" prefWidth="86.0" />
                   <TextField fx:id="ipField" prefHeight="26.0" prefWidth="241.0" promptText="Introduce la IP del servidor:">
                      <HBox.margin>
                         <Insets left="10.0" />
