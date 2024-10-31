@@ -278,10 +278,10 @@ public class ControllerMatch implements Initializable {
     public void drawSelectableObject(String objectId, JSONObject obj) {
 
         double cellSize = defenseGrid.getCellSize();
-/*
-        System.out.println("Object ID: " + objectId);
-        System.out.println("Object Data: " + obj);
-*/
+        /*
+            System.out.println("Object ID: " + objectId);
+            System.out.println("Object Data: " + obj);
+        */
         // Determine the position based on available keys
         double x, y;
     
@@ -301,15 +301,14 @@ public class ControllerMatch implements Initializable {
         }
     
         // Get the size using "cols" and "rows" (with defaults if missing)
-        double width = obj.optInt("cols", 1) * cellSize;
-        double height = obj.optInt("rows", 1) * cellSize;
-
+        double width = obj.optInt("cols", 1) * cellSize - 6;  // Reducir ancho por margen de 3 px a cada lado
+        double height = obj.optInt("rows", 1) * cellSize - 6; // Reducir altura por margen de 3 px a cada lado
+    
         if (!obj.getBoolean("isVertical")) {
-            //System.out.println("ES HORIZONTAL");
-                width = height;
-                height = cellSize;
-        } else {
-            //System.out.println("ES VERTICAL");
+            // Si es horizontal, intercambiar ancho y alto
+            double temp = width;
+            width = height;
+            height = temp;
         }
     
         // Select a color based on the objectId
@@ -321,7 +320,7 @@ public class ControllerMatch implements Initializable {
             default -> Color.GRAY;
         };
     
-        // Aplicar conversores para escalar la separación de 30pixeles a 20px
+        // Aplicar conversores para escalar la separación de 30 píxeles a 20 px
         for (double i = x; i > 1; i -= 30) {
             if (i != 30) {
                 x -= 10;
@@ -334,18 +333,19 @@ public class ControllerMatch implements Initializable {
             }
         }
     
-        //System.out.println("(" + x + "," + y + ")" + width + " " + height);
+        // System.out.println("(" + x + "," + y + ")" + width + " " + height);
     
-        // Draw the rectangle
+        // Dibujar el rectángulo con esquinas redondeadas
         gcDefense.setFill(color);
-        gcDefense.fillRect(x, y, width, height);
+        gcDefense.fillRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
     
-        // Draw the outline
+        // Dibujar el contorno
         gcDefense.setStroke(Color.BLACK);
-        gcDefense.strokeRect(x, y, width, height);
+        gcDefense.strokeRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
     }
     
-     private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
+    
+    private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
         // Obtener el tamaño de la celda del grid
         double cellSize = attackGrid.getCellSize(); // Asumiendo que estás usando el grid de ataque
     
@@ -405,22 +405,33 @@ public class ControllerMatch implements Initializable {
                 double cellSize = attackGrid.getCellSize();
                 double x = attackGrid.getStartX() + i * cellSize;
                 double y = attackGrid.getStartY() + j * cellSize;
-                if (enemyPaintBoard[i][j] == null ) {
-                    //
+    
+                // Cálculo de la posición del centro de la celda
+                double centerX = x + cellSize / 2;
+                double centerY = y + cellSize / 2;
+    
+                if (enemyPaintBoard[i][j] == null) {
+                    // No hacer nada
                 } else if (enemyPaintBoard[i][j]) {
-                    gcAttack.setFill(Color.RED);
+                    gcAttack.setFill(Color.LIGHTBLUE);
                     gcAttack.fillRect(x, y, cellSize, cellSize);
                     gcDefense.setStroke(Color.BLACK);
                     gcDefense.strokeRect(x, y, cellSize, cellSize);
+    
+                    // Dibuja el círculo en el centro
+                    gcAttack.setFill(Color.RED); // Color del círculo
+                    gcAttack.setStroke(Color.BLACK); // Color del borde
+                    gcAttack.setLineWidth(1); // Ancho del borde
+                    gcAttack.fillOval(centerX - 3, centerY - 3, 6, 6); // Círculo lleno
+                    gcAttack.strokeOval(centerX - 3, centerY - 3, 6, 6); // Contorno del círculo
                 } else if (!enemyPaintBoard[i][j]) {
                     gcAttack.setFill(Color.LIGHTBLUE);
                     gcAttack.fillRect(x, y, cellSize, cellSize);
-                    gcAttack.setStroke(Color.BLACK);
-                    gcAttack.strokeRect(x, y, cellSize, cellSize);
                 }
             }
         }
     }
+    
 
     private void changeUserPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {

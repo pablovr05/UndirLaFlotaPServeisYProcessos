@@ -178,8 +178,8 @@ public class ControllerPlay implements Initializable {
         if (mouseDragging) {
             // Actualizar temporalmente la posición del barco con las coordenadas del ratón
             JSONObject obj = selectableObjects.get(selectedObject);
-            obj.put("x", event.getX());
-            obj.put("y", event.getY());
+            obj.put("x", event.getX() - 10);
+            obj.put("y", event.getY() - 10);
         }
     }
 
@@ -438,39 +438,33 @@ public class ControllerPlay implements Initializable {
             rows = temp;
         }
     
-        double width = cols * cellSize;
-        double height = rows * cellSize;
+        double width = cols * cellSize - 10;  // Reducir el ancho para agregar un margen de 5 px en cada lado
+        double height = rows * cellSize - 10; // Reducir la altura para agregar un margen de 5 px en cada lado
+    
+        // Radio de las esquinas redondeadas
+        double cornerRadius = 10; // Ajusta el tamaño del radio como desees
     
         // Rotación del objeto
         int rotation = obj.optInt("rotation", 0); // Puedes omitir esto si no necesitas una rotación
         gc.save(); // Guarda el estado actual del contexto gráfico
-        gc.translate(x + width / 2, y + height / 2); // Mueve el origen al centro del objeto
+    
+        // Ajustar la posición de dibujo para que incluya el margen de 5 px
+        gc.translate(x + width / 2 + 5, y + height / 2 + 5); // Mueve el origen al centro del objeto
         gc.rotate(rotation); // Aplica la rotación si es necesaria
         gc.translate(-width / 2, -height / 2); // Mueve de nuevo el origen al ángulo original
     
-        // Seleccionar un color basado en el objectId
-        Color color = switch (objectId.toLowerCase()) {
-            case "red" -> Color.RED;
-            case "blue" -> Color.BLUE;
-            case "green" -> Color.GREEN;
-            case "yellow" -> Color.YELLOW;
-            default -> Color.GRAY;
-        };
-
-        // Dibujar el rectángulo
-        gc.setFill(color);
-        gc.fillRect(0, 0, width, height);
+        // Dibujar el rectángulo redondeado con el margen de 5 px
+        gc.setFill(Color.GRAY);
+        gc.fillRoundRect(0, 0, width, height, cornerRadius, cornerRadius);
     
-        // Dibujar el contorno
+        // Dibujar el contorno del barco con margen
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(0, 0, width, height);
-    
-        // Opcionalmente, agregar texto (por ejemplo, el objectId)
-        gc.setFill(Color.BLACK);
-        gc.fillText(objectId, 5, 15);
+        gc.strokeRoundRect(0, 0, width, height, cornerRadius, cornerRadius);
     
         gc.restore(); // Restaura el contexto gráfico
     }
+    
+    
 
     public boolean allShipsPlaced() {
         // Recorremos todos los barcos en selectableObjects
