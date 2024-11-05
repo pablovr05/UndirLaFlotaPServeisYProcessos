@@ -19,7 +19,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ControllerConnect implements Initializable {
@@ -133,6 +136,8 @@ public class ControllerConnect implements Initializable {
                             System.out.println("Inicio de combate contra: " + enemyName); 
                             UtilsViews.cambiarFrame("/assets/layout_viewplay.fxml"); 
 
+                           //enviarocuppiedpositions 
+
                         } else if ("serverSelectableObjects".equals(type)) {
 
                             new Thread(() -> {
@@ -152,6 +157,8 @@ public class ControllerConnect implements Initializable {
                             JSONObject barcosJugador = ControllerPlay.instance.getAllShipsAsJSON();
 
                             sendShipsToServer(barcosJugador);
+
+                            ControllerPlay.instance.sendOccupiedPositions();
 
                             UtilsViews.cambiarFrame("/assets/layout_match.fxml");
                         } else if ("mouseMoved".equals(type)) {
@@ -235,6 +242,40 @@ public class ControllerConnect implements Initializable {
                                 ControllerMatch.instance.textTurn.setText("Turno del rival");
                                 ControllerMatch.instance.createOverlay();
                             }
+                        } else if ("occupiedPositions".equals(type)) {
+                            JSONObject occupiedPositions = obj.getJSONObject("positions");
+                            String clientId = obj.getString("clientId");
+                        
+                            // Aquí puedes procesar las posiciones ocupadas recibidas
+                            System.out.println("Posiciones ocupadas de " + clientId + ": " + occupiedPositions.toString());
+
+                            Map<String, List<int[]>> enemyOccupiedPositions = new HashMap<>();
+
+                            Iterator<String> keys = occupiedPositions.keys();
+                            while (keys.hasNext()) {
+                                String shipId = keys.next(); // Por ejemplo, "00", "01", etc.
+                                JSONArray positionsArray = occupiedPositions.getJSONArray(shipId);
+
+                                List<int[]> positionsList = new ArrayList<>();
+
+                                // Recorrer el JSONArray de posiciones
+                                for (int i = 0; i < positionsArray.length(); i++) {
+                                    JSONObject position = positionsArray.getJSONObject(i);
+                                    int col = position.getInt("col");
+                                    int row = position.getInt("row");
+
+                                    // Agregar la posición como un arreglo de enteros
+                                    positionsList.add(new int[]{col, row});
+                                }
+
+                                // Agregar la lista de posiciones al mapa
+                                enemyOccupiedPositions.put(shipId, positionsList);
+                                }
+
+                            System.out.println(enemyOccupiedPositions);
+
+                            ControllerPlay.instance.setEnemyOccupiedPositions(enemyOccupiedPositions);
+                            
                         }
                     }
                 }

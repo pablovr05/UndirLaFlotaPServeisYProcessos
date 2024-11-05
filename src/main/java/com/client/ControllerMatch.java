@@ -2,6 +2,7 @@ package com.client;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -24,10 +25,12 @@ public class ControllerMatch implements Initializable {
     @FXML
     private Canvas defenseCanvas;
     @FXML
+    private Canvas enemyShipsCanvas;
+    @FXML
     public Text textTurn;
     @FXML
     private Pane overlayPane;
-    private GraphicsContext gcAttack, gcDefense;
+    private GraphicsContext gcAttack, gcDefense, gcEnemyShips;
 
     private String enemyID;
     private String playerID;
@@ -72,6 +75,7 @@ public class ControllerMatch implements Initializable {
         // Get drawing context
         this.gcAttack = attackCanvas.getGraphicsContext2D();
         this.gcDefense = defenseCanvas.getGraphicsContext2D();
+        this.gcEnemyShips = enemyShipsCanvas.getGraphicsContext2D();
 
         // Set listeners
         UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> { onSizeChanged(); });
@@ -227,6 +231,7 @@ public class ControllerMatch implements Initializable {
 
         doUserPaintBoard();
         doEnemyPaintBoard();
+        drawEnemyShipsCanvas();
 
         // Dibujar el cursor en cada cuadrícula
         for (String clientId : clientMousePositions.keySet()) {
@@ -278,11 +283,10 @@ public class ControllerMatch implements Initializable {
     public void drawSelectableObject(String objectId, JSONObject obj) {
 
         double cellSize = defenseGrid.getCellSize();
-/*
-        System.out.println("Object ID: " + objectId);
-        System.out.println("Object Data: " + obj);
-*/
-        // Determine the position based on available keys
+        /*
+            System.out.println("Object ID: " + objectId);
+            System.out.println("Object Data: " + obj);
+        */
         double x, y;
     
         if (obj.has("col") && obj.has("row")) {
@@ -301,27 +305,19 @@ public class ControllerMatch implements Initializable {
         }
     
         // Get the size using "cols" and "rows" (with defaults if missing)
-        double width = obj.optInt("cols", 1) * cellSize;
-        double height = obj.optInt("rows", 1) * cellSize;
-
+        double width = obj.optInt("cols", 1) * cellSize - 6;  // Reducir ancho por margen de 3 px a cada lado
+        double height = obj.optInt("rows", 1) * cellSize - 6; // Reducir altura por margen de 3 px a cada lado
+    
         if (!obj.getBoolean("isVertical")) {
-            //System.out.println("ES HORIZONTAL");
-                width = height;
-                height = cellSize;
-        } else {
-            //System.out.println("ES VERTICAL");
+            // Si es horizontal, intercambiar ancho y alto
+            double temp = width;
+            width = height;
+            height = temp;
         }
     
-        // Select a color based on the objectId
-        Color color = switch (objectId.toLowerCase()) {
-            case "red" -> Color.RED;
-            case "blue" -> Color.BLUE;
-            case "green" -> Color.GREEN;
-            case "yellow" -> Color.YELLOW;
-            default -> Color.GRAY;
-        };
+        Color color = Color.GRAY;
     
-        // Aplicar conversores para escalar la separación de 30pixeles a 20px
+        //Conversores para escalar la separación de 30 píxeles a 20 px
         for (double i = x; i > 1; i -= 30) {
             if (i != 30) {
                 x -= 10;
@@ -334,18 +330,19 @@ public class ControllerMatch implements Initializable {
             }
         }
     
-        //System.out.println("(" + x + "," + y + ")" + width + " " + height);
+        // System.out.println("(" + x + "," + y + ")" + width + " " + height);
     
-        // Draw the rectangle
+        // Dibujar el rectángulo con esquinas redondeadas
         gcDefense.setFill(color);
-        gcDefense.fillRect(x, y, width, height);
+        gcDefense.fillRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
     
-        // Draw the outline
+        // Dibujar el contorno
         gcDefense.setStroke(Color.BLACK);
-        gcDefense.strokeRect(x, y, width, height);
+        gcDefense.strokeRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
     }
     
-     private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
+    
+    private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
         // Obtener el tamaño de la celda del grid
         double cellSize = attackGrid.getCellSize(); // Asumiendo que estás usando el grid de ataque
     
@@ -405,22 +402,33 @@ public class ControllerMatch implements Initializable {
                 double cellSize = attackGrid.getCellSize();
                 double x = attackGrid.getStartX() + i * cellSize;
                 double y = attackGrid.getStartY() + j * cellSize;
-                if (enemyPaintBoard[i][j] == null ) {
-                    //
+    
+                // Cálculo de la posición del centro de la celda
+                double centerX = x + cellSize / 2;
+                double centerY = y + cellSize / 2;
+    
+                if (enemyPaintBoard[i][j] == null) {
+                    // No hacer nada
                 } else if (enemyPaintBoard[i][j]) {
-                    gcAttack.setFill(Color.RED);
+                    gcAttack.setFill(Color.LIGHTBLUE);
                     gcAttack.fillRect(x, y, cellSize, cellSize);
                     gcDefense.setStroke(Color.BLACK);
                     gcDefense.strokeRect(x, y, cellSize, cellSize);
+    
+                    // Dibuja el círculo en el centro
+                    gcAttack.setFill(Color.RED); // Color del círculo
+                    gcAttack.setStroke(Color.BLACK); // Color del borde
+                    gcAttack.setLineWidth(1); // Ancho del borde
+                    gcAttack.fillOval(centerX - 3, centerY - 3, 6, 6); // Círculo lleno
+                    gcAttack.strokeOval(centerX - 3, centerY - 3, 6, 6); // Contorno del círculo
                 } else if (!enemyPaintBoard[i][j]) {
                     gcAttack.setFill(Color.LIGHTBLUE);
                     gcAttack.fillRect(x, y, cellSize, cellSize);
-                    gcAttack.setStroke(Color.BLACK);
-                    gcAttack.strokeRect(x, y, cellSize, cellSize);
                 }
             }
         }
     }
+    
 
     private void changeUserPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
@@ -470,4 +478,83 @@ public class ControllerMatch implements Initializable {
         userPaintBoard[col][row] = hit;
     }
 
+    public void drawEnemyShipsCanvas() {
+        double x = 0;
+        double y = 0;
+        double rows = 0;
+        double columns = 0;
+        Color color;
+        for (String objectId : ControllerPlay.instance.getEnemyOccupiedPositions().keySet()) {
+
+            if (objectId.strip().equals("00")) {
+                rows = 2;
+                columns = 1;
+                x = 10;
+                y = 5;
+            } else if (objectId.strip().equals("01")) {
+                rows = 2;
+                columns = 1;
+                x = 10;
+                y = 25;
+            } else if (objectId.strip().equals("02")) {
+                rows = 3;
+                columns = 1;
+                x = 40;
+                y = 5;
+            } else if (objectId.strip().equals("03")) {
+                rows = 3;
+                columns = 1;
+                x = 40;
+                y = 25;
+            } else if (objectId.strip().equals("04")) {
+                rows = 4;
+                columns = 1;
+                x = 10;
+                y = 45;
+            } else if (objectId.strip().equals("05")) {
+                rows = 5;
+                columns = 1;
+                x = 10;
+                y = 65;
+            }
+
+            color = checkColorShip(ControllerPlay.instance.getEnemyOccupiedPositions().get(objectId));
+
+            double width = rows * 12;
+            double height = columns * 12;
+
+            gcEnemyShips.setFill(color);
+            gcEnemyShips.fillRoundRect(x, y, width, height, 10, 10); // Ajustar posición para el margen de 3 px
+        
+            // Dibujar el contorno
+            gcEnemyShips.setStroke(Color.BLACK);
+            gcEnemyShips.strokeRoundRect(x, y, width, height, 10, 10);
+
+        }
+    }
+
+    private Color checkColorShip(List<int[]> casillas) {
+        int casillasBarco = casillas.size();
+        int casillasDescubiertas = 0;
+    
+        for (int[] casilla : casillas) {
+            int row = casilla[0];
+            int column = casilla[1];
+    
+            // Verificación de null antes de intentar acceder al valor
+            if (enemyPaintBoard[row][column] != null) {
+                if (enemyPaintBoard[row][column]) {
+                    casillasDescubiertas += 1;
+                }
+            }
+        }
+    
+        if (casillasDescubiertas == casillasBarco) {
+            return Color.RED;
+        } else if (casillasDescubiertas > 0) {
+            return Color.ORANGE;
+        } else {
+            return Color.GRAY;
+        }
+    }    
 }

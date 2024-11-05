@@ -335,6 +335,38 @@ public class Main extends WebSocketServer {
                         }
                     }
                     break;
+                
+                case "occupiedPositions":
+                    // Obtener las posiciones ocupadas
+                    JSONObject occupiedPositions = obj.getJSONObject("positions");
+
+                    // Encontrar el oponente del jugador
+                    ClientFX opponent = null;
+                    for (ClientFX client : clients) {
+                        if (!client.getNombre().equals(clientId) && client.getSelectedPlayerName() != null && client.getSelectedPlayerName().equals(clientId)) {
+                            opponent = client;
+                            break;
+                        }
+                    }
+                    
+                    // Si se encontró un oponente, enviarle las posiciones ocupadas
+                    if (opponent != null) {
+                        JSONObject responseMessage = new JSONObject();
+                        responseMessage.put("type", "occupiedPositions");
+                        responseMessage.put("clientId", clientId);
+                        responseMessage.put("positions", occupiedPositions);
+
+                        try {
+                            opponent.getClienteWebSocket().send(responseMessage.toString());
+                        } catch (WebsocketNotConnectedException e) {
+                            System.out.println("Cliente no conectado: " + opponent.getNombre());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        System.out.println("Oponente no encontrado para: " + clientId);
+                    }
+                    break;
             }
         }
     }
