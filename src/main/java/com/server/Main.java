@@ -348,7 +348,7 @@ public class Main extends WebSocketServer {
                             break;
                         }
                     }
-
+                    
                     // Si se encontró un oponente, enviarle las posiciones ocupadas
                     if (opponent != null) {
                         JSONObject responseMessage = new JSONObject();
