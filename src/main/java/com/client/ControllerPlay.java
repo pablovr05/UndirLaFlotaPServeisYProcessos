@@ -46,6 +46,8 @@ public class ControllerPlay implements Initializable {
     private String selectedObject = "";
 
     private Map<String, List<int[]>> occupiedPositions = new HashMap<>();
+    private Map<String, List<int[]>> enemyOccupiedPositions = new HashMap<>();
+
     private Map<String, double[]> boatPositions = new HashMap<>();
 
     public static ControllerPlay instance;
@@ -538,5 +540,41 @@ public class ControllerPlay implements Initializable {
         }
 
         return allShipsJSON;
+    }
+
+    public Map<String, List<int[]>> getEnemyOccupiedPositions() {
+        return enemyOccupiedPositions;
+    }
+
+    public void setEnemyOccupiedPositions(Map<String, List<int[]>> enemyOccupiedPositions) {
+        this.enemyOccupiedPositions = enemyOccupiedPositions;
+    }
+
+    public void sendOccupiedPositions() {
+        JSONObject occupiedPositionsJSON = new JSONObject();
+        
+        for (String shipId : occupiedPositions.keySet()) {
+            JSONArray positionsArray = new JSONArray();
+            List<int[]> positions = occupiedPositions.get(shipId);
+            
+            for (int[] pos : positions) {
+                JSONObject position = new JSONObject();
+                position.put("col", pos[0]);
+                position.put("row", pos[1]);
+                positionsArray.put(position);
+            }
+            
+            occupiedPositionsJSON.put(shipId, positionsArray);
+        }
+    
+        // Enviar las posiciones ocupadas al servidor
+        if (ControllerConnect.clienteWebSocket != null) {
+            JSONObject message = new JSONObject();
+            message.put("type", "occupiedPositions");
+            message.put("clientId", ControllerConnect.nombre);
+            message.put("positions", occupiedPositionsJSON);
+            
+            ControllerConnect.clienteWebSocket.send(message.toString());
+        }
     }
 }
