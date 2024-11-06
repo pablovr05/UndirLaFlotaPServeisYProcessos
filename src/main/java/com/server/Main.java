@@ -113,20 +113,22 @@ public class Main extends WebSocketServer {
                     String player = obj.getString("player");
                     String selectingPlayer = obj.getString("selectingPlayer");
                     String socketId = obj.getString("socketId");
-                    String messageToDisplay = String.format("Jugador %s (socketId: %s) ha seleccionado a jugador %s", selectingPlayer, socketId, player);
+                    String messageToDisplay = String.format("Jugador %s (socketId: %s) ha seleccionado a jugador %s",
+                            selectingPlayer, socketId, player);
                     System.out.println(messageToDisplay);
 
                     ClientFX clienteSeleccionado = null;
 
                     for (ClientFX cliente : clients) {
-                        if (cliente.getNombre().equals(player)) { //Cliente seleccionado
-                            clienteSeleccionado = cliente;                       }
+                        if (cliente.getNombre().equals(player)) { // Cliente seleccionado
+                            clienteSeleccionado = cliente;
+                        }
                     }
 
                     ClientFX clienteSeleccionando = null;
 
                     for (ClientFX cliente : clients) {
-                        if (cliente.getClienteWebSocket() == conn) { //Cliente que selecciona
+                        if (cliente.getClienteWebSocket() == conn) { // Cliente que selecciona
                             clienteSeleccionando = cliente;
                             if (clienteSeleccionado != null) {
                                 clienteSeleccionando.setSelectedPlayerName(clienteSeleccionado.getNombre());
@@ -141,10 +143,12 @@ public class Main extends WebSocketServer {
                     }
 
                     if (clienteSeleccionado != null) {
-                        System.out.println("Cliente " + clienteSeleccionando.getNombre() + " ha seleccionado a " + clienteSeleccionado.getNombre());
+                        System.out.println("Cliente " + clienteSeleccionando.getNombre() + " ha seleccionado a "
+                                + clienteSeleccionado.getNombre());
                         if (checkMutualSelection(clienteSeleccionando, clienteSeleccionado)) {
                             if (sendMatchConfirmedMessages(clienteSeleccionando, clienteSeleccionado)) {
-                                System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionando.getNombre());
+                                System.out.println(
+                                        "El mensaje se envió correctamente a: " + clienteSeleccionando.getNombre());
 
                                 WebSocket socketIdClienteSeleccionado = clienteSeleccionado.getClienteWebSocket();
 
@@ -158,10 +162,12 @@ public class Main extends WebSocketServer {
                                 }).start();
 
                             } else {
-                                System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionando.getNombre());
+                                System.out.println(
+                                        "Hubo un error en el envio del mensaje a " + clienteSeleccionando.getNombre());
                             }
                             if (sendMatchConfirmedMessages(clienteSeleccionado, clienteSeleccionando)) {
-                                System.out.println("El mensaje se envió correctamente a: " + clienteSeleccionado.getNombre());
+                                System.out.println(
+                                        "El mensaje se envió correctamente a: " + clienteSeleccionado.getNombre());
 
                                 WebSocket socketIdClienteSeleccionando = clienteSeleccionando.getClienteWebSocket();
 
@@ -175,25 +181,29 @@ public class Main extends WebSocketServer {
                                 }).start(); // Iniciar el nuevo hilo
 
                             } else {
-                                System.out.println("Hubo un error en el envio del mensaje a " + clienteSeleccionado.getNombre());
+                                System.out.println(
+                                        "Hubo un error en el envio del mensaje a " + clienteSeleccionado.getNombre());
                             }
                         }
                     } else {
-                        System.out.println("La instancia de clienteseleccionado es null ya que el cliente ha dado a cancelar.");
-                        System.out.println("Para el cliente: " + clienteSeleccionando.getNombre() + " ha seleccionado " + null);
+                        System.out.println(
+                                "La instancia de clienteseleccionado es null ya que el cliente ha dado a cancelar.");
+                        System.out.println(
+                                "Para el cliente: " + clienteSeleccionando.getNombre() + " ha seleccionado " + null);
                     }
 
-                    break;  
+                    break;
                 case "playerReady":
                     String playerReady = obj.getString("name");
                     String socketIdReady = obj.getString("socketId");
                     String enemyNameReady = obj.optString("enemyName", null); // Permitir `null` si falta `enemyName`
-                
-                    System.out.printf("Jugador %s (socketId: %s) está listo para empezar contra %s%n", playerReady, socketIdReady, enemyNameReady);
-                
+
+                    System.out.printf("Jugador %s (socketId: %s) está listo para empezar contra %s%n", playerReady,
+                            socketIdReady, enemyNameReady);
+
                     ClientFX clienteUser = null;
                     boolean exit = false;
-                
+
                     // Buscar y actualizar `clienteUser`
                     for (ClientFX cliente : clients) {
                         if (cliente.getNombre().equals(playerReady)) {
@@ -207,12 +217,12 @@ public class Main extends WebSocketServer {
                             break;
                         }
                     }
-                
+
                     if (exit) {
                         System.out.println("ES NULL"); // Solo se imprime si `enemyNameReady` es `null` o vacío
                         break;
                     }
-                
+
                     // Buscar `clienteEnemy` por el nombre
                     ClientFX clienteEnemy = null;
                     for (ClientFX cliente : clients) {
@@ -221,16 +231,16 @@ public class Main extends WebSocketServer {
                             break;
                         }
                     }
-                
+
                     if (clienteEnemy == null) {
                         System.out.println("Oponente no encontrado.");
                         break;
                     }
-                
+
                     // Confirmar si ambos jugadores están listos para jugar entre sí
                     if (clienteUser.getReadyToStartAgainst().equals(clienteEnemy.getNombre()) &&
-                        clienteEnemy.getReadyToStartAgainst() != null &&
-                        clienteEnemy.getReadyToStartAgainst().equals(clienteUser.getNombre())) {
+                            clienteEnemy.getReadyToStartAgainst() != null &&
+                            clienteEnemy.getReadyToStartAgainst().equals(clienteUser.getNombre())) {
                         System.out.println("Todo listo para empezar");
 
                         if (sendReadyToStartMessage(clienteUser, clienteEnemy)) {
@@ -242,8 +252,8 @@ public class Main extends WebSocketServer {
                         if (sendReadyToStartMessage(clienteEnemy, clienteUser)) {
                             System.out.println("Se envió el mensaje de empezar a " + clienteEnemy.getNombre());
                         } else {
-                            System.out.println("Error al enviar el mensaje"); 
-                        }  
+                            System.out.println("Error al enviar el mensaje");
+                        }
 
                         String uName = clienteUser.getNombre();
                         WebSocket uWebSocket = clienteUser.getClienteWebSocket();
@@ -257,21 +267,21 @@ public class Main extends WebSocketServer {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                        }).start(); 
+                        }).start();
 
                     } else {
                         System.out.println("Tu oponente no está listo para empezar");
                     }
-                    break; 
+                    break;
                 case "playerShips":
                     // Obtener los barcos enviados por el cliente
                     JSONObject barcosDelJugador = obj.getJSONObject("ships");
                     String nombreJugador = obj.getString("playerName");
-                    
+
                     if (nombreJugador != null) {
                         System.out.println("Barcos de " + clientId + " recibidos: " + barcosDelJugador.toString());
                         Tablero tableroJugador = new Tablero(10); // Initialize player's board
-                    
+
                         // Iterate through the ships
                         tableroJugador.cargarBarcosDesdeJSON(barcosDelJugador);
 
@@ -283,7 +293,7 @@ public class Main extends WebSocketServer {
                         System.out.println("ID de cliente no encontrado para recibir barcos.");
                     }
 
-                    break;  
+                    break;
                 case "mouseMoved":
                     broadcastMessage(obj.toString(), conn); // Envía a todos menos al remitente
                     break;
@@ -354,7 +364,7 @@ public class Main extends WebSocketServer {
                 }
             }
         }
-    }    
+    }
 
     private void sendClientsList() {
         // Crear un JSON con la lista de nombres de clientes
@@ -383,7 +393,7 @@ public class Main extends WebSocketServer {
     public void sendServerSelectableObjects(WebSocket conn) {
         // Create a JSON object to hold the response
         JSONObject rst1 = new JSONObject();
-        
+
         // Retrieve the client name associated with the WebSocket connection
         ClientFX client = null;
         for (ClientFX cliente : clients) {
@@ -392,13 +402,13 @@ public class Main extends WebSocketServer {
                 break;
             }
         }
-    
+
         // If client is found, put the selectable objects into the response
         if (client != null) {
             String clientName = client.getNombre();
             rst1.put("type", "serverSelectableObjects");
             rst1.put("selectableObjects", clientSelectableObjects.get(clientName));
-    
+
             try {
                 // Send the JSON response back to the client
                 conn.send(rst1.toString());
@@ -422,10 +432,12 @@ public class Main extends WebSocketServer {
         setConnectionLostTimeout(100);
     }
 
-    private boolean checkMutualSelection(ClientFX seleccionando, ClientFX seleccionado ) {
+    private boolean checkMutualSelection(ClientFX seleccionando, ClientFX seleccionado) {
         if (seleccionando.getSelectedPlayerName() != null && seleccionado.getSelectedPlayerName() != null) {
-            if (seleccionando.getNombre().equals(seleccionado.getSelectedPlayerName()) && seleccionado.getNombre().equals(seleccionando.getSelectedPlayerName())) {
-                System.out.println("Ha habido match entre: " + seleccionando.getNombre() + " y " + seleccionado.getNombre());
+            if (seleccionando.getNombre().equals(seleccionado.getSelectedPlayerName())
+                    && seleccionado.getNombre().equals(seleccionando.getSelectedPlayerName())) {
+                System.out.println(
+                        "Ha habido match entre: " + seleccionando.getNombre() + " y " + seleccionado.getNombre());
                 return true;
             } else {
                 System.out.println(seleccionado.getNombre() + " no ha seleccionado a nadie o no te tiene seleccionado");
@@ -509,6 +521,7 @@ public class Main extends WebSocketServer {
         obj0.put("y", 20);
         obj0.put("cols", 1);
         obj0.put("rows", 2);
+        obj0.put("imgPath", "/images/boat1.png");
         selectableObjects.put(name0, obj0);
 
         String name1 = "01";
@@ -518,6 +531,7 @@ public class Main extends WebSocketServer {
         obj1.put("y", 20);
         obj1.put("cols", 1);
         obj1.put("rows", 2);
+        obj1.put("imgPath", "/images/boat1.png");
         selectableObjects.put(name1, obj1);
 
         String name2 = "02";
@@ -527,6 +541,7 @@ public class Main extends WebSocketServer {
         obj2.put("y", 90);
         obj2.put("cols", 1);
         obj2.put("rows", 3);
+        obj2.put("imgPath", "/images/boat2.png");
         selectableObjects.put(name2, obj2);
 
         String name3 = "03";
@@ -536,6 +551,7 @@ public class Main extends WebSocketServer {
         obj3.put("y", 90);
         obj3.put("cols", 1);
         obj3.put("rows", 3);
+        obj3.put("imgPath", "/images/boat2.png");
         selectableObjects.put(name3, obj3);
 
         String name4 = "04";
@@ -545,19 +561,21 @@ public class Main extends WebSocketServer {
         obj4.put("y", 190);
         obj4.put("cols", 1);
         obj4.put("rows", 4);
+        obj4.put("imgPath", "/images/boat3.png");
         selectableObjects.put(name4, obj4);
 
         String name5 = "05";
         JSONObject obj5 = new JSONObject();
         obj5.put("objectId", name5);
-        obj5.put("x", 410); 
+        obj5.put("x", 410);
         obj5.put("y", 190);
-        obj5.put("cols", 1);  
+        obj5.put("cols", 1);
         obj5.put("rows", 5);
+        obj5.put("imgPath", "/images/boat4.png");
         selectableObjects.put(name5, obj5);
     }
 
-    public void startBattle(String usuario, WebSocket webSocketUsuario, String enemigo,WebSocket webSocketEnemigo) {
+    public void startBattle(String usuario, WebSocket webSocketUsuario, String enemigo, WebSocket webSocketEnemigo) {
         Random random = new Random();
         int firstTurn = random.nextInt(2);
 
@@ -586,6 +604,6 @@ public class Main extends WebSocketServer {
             System.out.println(2);
             System.out.println(messageStart);
             System.out.println(messageSecond);
-        }   
+        }
     }
 }

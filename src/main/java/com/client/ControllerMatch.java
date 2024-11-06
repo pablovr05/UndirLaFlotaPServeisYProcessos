@@ -18,7 +18,6 @@ import javafx.scene.text.Text;
 
 public class ControllerMatch implements Initializable {
 
-
     @FXML
     private Canvas attackCanvas;
     @FXML
@@ -74,8 +73,12 @@ public class ControllerMatch implements Initializable {
         this.gcDefense = defenseCanvas.getGraphicsContext2D();
 
         // Set listeners
-        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> { onSizeChanged(); });
-        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> { onSizeChanged(); });
+        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> {
+            onSizeChanged();
+        });
+        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> {
+            onSizeChanged();
+        });
 
         attackCanvas.setOnMouseMoved(this::setOnMouseMoved);
         attackCanvas.setOnMousePressed(this::onMousePressed);
@@ -115,11 +118,11 @@ public class ControllerMatch implements Initializable {
     private void setOnMouseMoved(MouseEvent event) {
         double mouseX = event.getX();
         double mouseY = event.getY();
-        
+
         JSONObject newPosition = new JSONObject();
         newPosition.put("x", mouseX);
         newPosition.put("y", mouseY);
-        
+
         if (attackGrid.isPositionInsideGrid(mouseX, mouseY)) {
             highlightedCol = attackGrid.getCol(mouseX);
             highlightedRow = attackGrid.getRow(mouseY);
@@ -131,14 +134,15 @@ public class ControllerMatch implements Initializable {
             newPosition.put("col", -1);
             newPosition.put("row", -1);
         }
-        
+
         newPosition.put("clientId", playerID);
-        
+
         // Enviar la posición al servidor
         sendPositionToServer(newPosition);
-        
+
         // Mensaje de depuración
-        //System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ", Y=" + mouseY);
+        // System.out.println("Posición de mouse del usuario enviada: X=" + mouseX + ",
+        // Y=" + mouseY);
     }
 
     private void onMousePressed(MouseEvent event) {
@@ -146,21 +150,23 @@ public class ControllerMatch implements Initializable {
         double mouseX = event.getX();
         double mouseY = event.getY();
 
-        /*selectedObject = "";
-
-        for (String objectId : selectableObjects.keySet()) {
-            JSONObject obj = (JSONObject) selectableObjects.get(objectId);
-            int objX = obj.getInt("x");
-            int objY = obj.getInt("y");
-            int cols = obj.getInt("cols");
-            int rows = obj.getInt("rows");
-
-            if (isPositionInsideObject(mouseX, mouseY, objX, objY,  cols, rows)) {
-                selectedObject = objectId;
-                //System.out.println("Barco " + selectedObject + " clickeado2");
-                break;
-            }
-        }*/
+        /*
+         * selectedObject = "";
+         * 
+         * for (String objectId : selectableObjects.keySet()) {
+         * JSONObject obj = (JSONObject) selectableObjects.get(objectId);
+         * int objX = obj.getInt("x");
+         * int objY = obj.getInt("y");
+         * int cols = obj.getInt("cols");
+         * int rows = obj.getInt("rows");
+         * 
+         * if (isPositionInsideObject(mouseX, mouseY, objX, objY, cols, rows)) {
+         * selectedObject = objectId;
+         * //System.out.println("Barco " + selectedObject + " clickeado2");
+         * break;
+         * }
+         * }
+         */
     }
 
     private void onMouseDragged(MouseEvent event) {
@@ -176,7 +182,7 @@ public class ControllerMatch implements Initializable {
 
         if (col != -1 && row != -1) {
             System.out.println("Atacando a la celda " + col + ", " + row);
-            if(enemyPaintBoard[col][row] == null) {
+            if (enemyPaintBoard[col][row] == null) {
                 sendAttackMessage(col, row);
             }
         }
@@ -189,9 +195,12 @@ public class ControllerMatch implements Initializable {
             clientMousePositions.put(clientId, positionObject);
         }
     }
+
     // Run game (and animations)
     private void run(double fps) {
-        if (animationTimer.fps < 1) { return; }
+        if (animationTimer.fps < 1) {
+            return;
+        }
         // Update objects and animations here
     }
 
@@ -200,7 +209,7 @@ public class ControllerMatch implements Initializable {
         // Limpiar el área de dibujo
         gcAttack.clearRect(0, 0, attackCanvas.getWidth(), attackCanvas.getHeight());
         gcDefense.clearRect(0, 0, defenseCanvas.getWidth(), defenseCanvas.getHeight());
-    
+
         // Dibujar la celda resaltada en rosa
         if (highlightedCol >= 0 && highlightedRow >= 0) {
             double cellX = attackGrid.getCellX(highlightedCol);
@@ -212,8 +221,10 @@ public class ControllerMatch implements Initializable {
             gcAttack.setStroke(Color.RED); // Cambia el color de la "X" si lo deseas
 
             // Dibuja la "X"
-            gcAttack.strokeLine(cellX + padding, cellY + padding, cellX + cellSize - padding, cellY + cellSize - padding);
-            gcAttack.strokeLine(cellX + cellSize - padding, cellY + padding, cellX + padding, cellY + cellSize - padding);
+            gcAttack.strokeLine(cellX + padding, cellY + padding, cellX + cellSize - padding,
+                    cellY + cellSize - padding);
+            gcAttack.strokeLine(cellX + cellSize - padding, cellY + padding, cellX + padding,
+                    cellY + cellSize - padding);
         }
 
         // Dibujar las cuadrículas
@@ -233,7 +244,7 @@ public class ControllerMatch implements Initializable {
             JSONObject position = clientMousePositions.get(clientId);
             double mouseX = position.getDouble("x");
             double mouseY = position.getDouble("y");
-    
+
             gcDefense.setFill(Color.RED);
             gcDefense.fillOval(mouseX - 5, mouseY - 5, 10, 10);
         }
@@ -278,13 +289,13 @@ public class ControllerMatch implements Initializable {
     public void drawSelectableObject(String objectId, JSONObject obj) {
 
         double cellSize = defenseGrid.getCellSize();
-/*
-        System.out.println("Object ID: " + objectId);
-        System.out.println("Object Data: " + obj);
-*/
+        /*
+         * System.out.println("Object ID: " + objectId);
+         * System.out.println("Object Data: " + obj);
+         */
         // Determine the position based on available keys
         double x, y;
-    
+
         if (obj.has("col") && obj.has("row")) {
             // Use "col" and "row" for positioning if they exist
             int col = obj.getInt("col");
@@ -299,19 +310,19 @@ public class ControllerMatch implements Initializable {
             System.out.println("Error: Missing positioning keys for object " + objectId);
             return;
         }
-    
+
         // Get the size using "cols" and "rows" (with defaults if missing)
         double width = obj.optInt("cols", 1) * cellSize;
         double height = obj.optInt("rows", 1) * cellSize;
 
         if (!obj.getBoolean("isVertical")) {
-            //System.out.println("ES HORIZONTAL");
-                width = height;
-                height = cellSize;
+            // System.out.println("ES HORIZONTAL");
+            width = height;
+            height = cellSize;
         } else {
-            //System.out.println("ES VERTICAL");
+            // System.out.println("ES VERTICAL");
         }
-    
+
         // Select a color based on the objectId
         Color color = switch (objectId.toLowerCase()) {
             case "red" -> Color.RED;
@@ -320,46 +331,46 @@ public class ControllerMatch implements Initializable {
             case "yellow" -> Color.YELLOW;
             default -> Color.GRAY;
         };
-    
+
         // Aplicar conversores para escalar la separación de 30pixeles a 20px
         for (double i = x; i > 1; i -= 30) {
             if (i != 30) {
                 x -= 10;
             }
         }
-    
+
         for (double i = y; i > 1; i -= 30) {
             if (i != 30) {
                 y -= 10;
             }
         }
-    
-        //System.out.println("(" + x + "," + y + ")" + width + " " + height);
-    
+
+        // System.out.println("(" + x + "," + y + ")" + width + " " + height);
+
         // Draw the rectangle
         gcDefense.setFill(color);
         gcDefense.fillRect(x, y, width, height);
-    
+
         // Draw the outline
         gcDefense.setStroke(Color.BLACK);
         gcDefense.strokeRect(x, y, width, height);
     }
-    
-     private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
+
+    private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
         // Obtener el tamaño de la celda del grid
         double cellSize = attackGrid.getCellSize(); // Asumiendo que estás usando el grid de ataque
-    
+
         // Calcular las coordenadas del objeto
         double objectX = objX * cellSize; // Coordenada X inicial del objeto
         double objectY = objY * cellSize; // Coordenada Y inicial del objeto
-    
+
         // Calcular las coordenadas del objeto en base a su tamaño
         double objectWidth = cols * cellSize; // Ancho del objeto
         double objectHeight = rows * cellSize; // Altura del objeto
-    
+
         // Comprobar si la posición del mouse está dentro de las coordenadas del objeto
         return mouseX >= objectX && mouseX <= (objectX + objectWidth) &&
-               mouseY >= objectY && mouseY <= (objectY + objectHeight);
+                mouseY >= objectY && mouseY <= (objectY + objectHeight);
     }
 
     private void sendPositionToServer(JSONObject position) {
@@ -386,7 +397,7 @@ public class ControllerMatch implements Initializable {
                 double cellSize = defenseGrid.getCellSize();
                 double x = defenseGrid.getStartX() + i * cellSize;
                 double y = defenseGrid.getStartY() + j * cellSize;
-                if (userPaintBoard[i][j] == null ) {
+                if (userPaintBoard[i][j] == null) {
                     // continue;
                 } else if (userPaintBoard[i][j]) {
                     gcDefense.setFill(Color.RED);
@@ -405,7 +416,7 @@ public class ControllerMatch implements Initializable {
                 double cellSize = attackGrid.getCellSize();
                 double x = attackGrid.getStartX() + i * cellSize;
                 double y = attackGrid.getStartY() + j * cellSize;
-                if (enemyPaintBoard[i][j] == null ) {
+                if (enemyPaintBoard[i][j] == null) {
                     //
                 } else if (enemyPaintBoard[i][j]) {
                     gcAttack.setFill(Color.RED);
@@ -425,7 +436,8 @@ public class ControllerMatch implements Initializable {
     private void changeUserPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             userPaintBoard[x][y] = estado;
-            //System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+            // System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a "
+            // + estado);
         } else {
             System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
         }
@@ -434,7 +446,8 @@ public class ControllerMatch implements Initializable {
     private void changeEnemyPaintBoard(boolean estado, int x, int y) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
             enemyPaintBoard[x][y] = estado;
-            //System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a " + estado);
+            // System.out.println("Estado cambiado en la posición (" + x + ", " + y + ") a "
+            // + estado);
         } else {
             System.out.println("Índices fuera de rango: (" + x + ", " + y + ")");
         }

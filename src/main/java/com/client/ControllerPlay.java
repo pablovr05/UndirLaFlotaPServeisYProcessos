@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+
 import org.json.JSONObject;
 
 import javafx.fxml.FXML;
@@ -19,7 +21,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-
 
 import org.json.JSONArray;
 
@@ -55,17 +56,17 @@ public class ControllerPlay implements Initializable {
         instance = this;
 
         this.gc = canvas.getGraphicsContext2D();
-        
+
         // Establecer el tamaño del canvas fijo
         canvas.setWidth(550);
         canvas.setHeight(375);
 
-        boatPositions.put("00", new double[]{450, 20});
-        boatPositions.put("01", new double[]{410, 20});
-        boatPositions.put("02", new double[]{410, 90});
-        boatPositions.put("03", new double[]{450, 90});
-        boatPositions.put("04", new double[]{450, 190});
-        boatPositions.put("05", new double[]{410, 190});
+        boatPositions.put("00", new double[] { 450, 20 });
+        boatPositions.put("01", new double[] { 410, 20 });
+        boatPositions.put("02", new double[] { 410, 90 });
+        boatPositions.put("03", new double[] { 450, 90 });
+        boatPositions.put("04", new double[] { 450, 190 });
+        boatPositions.put("05", new double[] { 410, 190 });
 
         removeOverlay();
 
@@ -74,20 +75,22 @@ public class ControllerPlay implements Initializable {
 
         // Configurar los listeners
         // El tamaño del canvas no debe cambiar al redimensionar la ventana
-        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> {});
-        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> {});
+        UtilsViews.parentContainer.heightProperty().addListener((observable, oldValue, newvalue) -> {
+        });
+        UtilsViews.parentContainer.widthProperty().addListener((observable, oldValue, newvalue) -> {
+        });
 
         // Configurar los manejadores de eventos del ratón
         canvas.setOnMouseMoved(this::setOnMouseMoved);
         canvas.setOnMousePressed(this::onMousePressed);
         canvas.setOnMouseDragged(this::onMouseDragged);
         canvas.setOnMouseReleased(this::onMouseReleased);
-        
+
         // Configurar el manejador de eventos de teclado para rotar el objeto
         canvas.setOnKeyPressed(this::onKeyPressed);
 
         // Definir la rejilla
-        grid = new PlayGrid(30, 30, 30, 10, 10);  // Asegúrate de que estos valores sean correctos para tu rejilla
+        grid = new PlayGrid(30, 30, 30, 10, 10); // Asegúrate de que estos valores sean correctos para tu rejilla
 
         // Iniciar el temporizador de animación
         animationTimer = new PlayTimer(this::run, this::draw, 0);
@@ -103,7 +106,6 @@ public class ControllerPlay implements Initializable {
             System.out.println(selectedObject + " ahora es " + (isVertical ? "vertical" : "horizontal"));
         }
     }
-
 
     // When window changes its size
     public void onSizeChanged() {
@@ -131,7 +133,7 @@ public class ControllerPlay implements Initializable {
         JSONObject newPosition = new JSONObject();
         newPosition.put("x", mouseX);
         newPosition.put("y", mouseY);
-        if (grid.isPositionInsideGrid(mouseX, mouseY)) {                
+        if (grid.isPositionInsideGrid(mouseX, mouseY)) {
             newPosition.put("col", grid.getCol(mouseX));
             newPosition.put("row", grid.getRow(mouseY));
         } else {
@@ -144,7 +146,7 @@ public class ControllerPlay implements Initializable {
         JSONObject msgObj = clientMousePositions.get(ControllerConnect.nombre);
         msgObj.put("type", "clientMouseMoving");
         msgObj.put("clientId", ControllerConnect.nombre);
-    
+
         if (ControllerConnect.clienteWebSocket != null) {
             ControllerConnect.clienteWebSocket.send(msgObj.toString());
         }
@@ -153,17 +155,17 @@ public class ControllerPlay implements Initializable {
     private void onMousePressed(MouseEvent event) {
         double mouseX = event.getX();
         double mouseY = event.getY();
-    
+
         selectedObject = "";
         mouseDragging = false;
-    
+
         for (String objectId : selectableObjects.keySet()) {
             JSONObject obj = selectableObjects.get(objectId);
             int objX = obj.getInt("x");
             int objY = obj.getInt("y");
             int cols = obj.getInt("cols");
             int rows = obj.getInt("rows");
-    
+
             if (isPositionInsideObject(mouseX, mouseY, objX, objY, cols, rows, obj)) {
                 selectedObject = objectId;
                 System.out.println("Barco " + selectedObject + " clickeado");
@@ -172,7 +174,6 @@ public class ControllerPlay implements Initializable {
             }
         }
     }
-    
 
     private void onMouseDragged(MouseEvent event) {
         if (mouseDragging) {
@@ -184,76 +185,87 @@ public class ControllerPlay implements Initializable {
     }
 
     private void onMouseReleased(MouseEvent event) {
-    if (!selectedObject.isEmpty()) {
-        JSONObject obj = selectableObjects.get(selectedObject);
-        
-        // Obtener el tamaño del barco en celdas
-        int cols = obj.getInt("cols");
-        int rows = obj.getInt("rows");
+        if (!selectedObject.isEmpty()) {
+            JSONObject obj = selectableObjects.get(selectedObject);
 
-        // Verificar la orientación
-        boolean isVertical = obj.optBoolean("isVertical", true);
-        if (!isVertical) {
-            // Intercambiar columnas y filas si es vertical
-            int temp = cols;
-            cols = rows;
-            rows = temp;
-        }
+            // Obtener el tamaño del barco en celdas
+            int cols = obj.getInt("cols");
+            int rows = obj.getInt("rows");
 
-        // Obtener la posición de la esquina superior izquierda del barco en píxeles
-        double mouseX = event.getX();
-        double mouseY = event.getY();
+            // Verificar la orientación
+            boolean isVertical = obj.optBoolean("isVertical", true);
+            if (!isVertical) {
+                // Intercambiar columnas y filas si es vertical
+                int temp = cols;
+                cols = rows;
+                rows = temp;
+            }
 
-        // Obtener la columna y fila de la cuadrícula donde se colocará la esquina superior izquierda del barco
-        int startCol = grid.getCol(mouseX);
-        int startRow = grid.getRow(mouseY);
+            // Obtener la posición de la esquina superior izquierda del barco en píxeles
+            double mouseX = event.getX();
+            double mouseY = event.getY();
 
-        // Verificar si el barco cabe dentro de los límites de la cuadrícula
-        if (startCol >= 0 && startRow >= 0 && startCol + cols <= grid.getCols() && startRow + rows <= grid.getRows()) {
-            // Verificar si el barco colisiona con otros barcos
-            
-            if (!checkCollision(startCol, startRow, cols, rows, isVertical)) {
-                // Actualizar la posición del barco en píxeles a la cuadrícula (esquina superior izquierda)
-                obj.put("x", grid.getCellX(startCol));
-                obj.put("y", grid.getCellY(startRow));
+            // Obtener la columna y fila de la cuadrícula donde se colocará la esquina
+            // superior izquierda del barco
+            int startCol = grid.getCol(mouseX);
+            int startRow = grid.getRow(mouseY);
 
-                // Almacenar las posiciones ocupadas por este barco
-                List<int[]> positions = new ArrayList<>();
-                for (int row = startRow; row < startRow + rows; row++) {
-                    for (int col = startCol; col < startCol + cols; col++) {
-                        positions.add(new int[]{col, row});
+            // Verificar si el barco cabe dentro de los límites de la cuadrícula
+            if (startCol >= 0 && startRow >= 0 && startCol + cols <= grid.getCols()
+                    && startRow + rows <= grid.getRows()) {
+                // Verificar si el barco colisiona con otros barcos
+
+                if (!checkCollision(startCol, startRow, cols, rows, isVertical)) {
+                    // Actualizar la posición del barco en píxeles a la cuadrícula (esquina superior
+                    // izquierda)
+                    obj.put("x", grid.getCellX(startCol));
+                    obj.put("y", grid.getCellY(startRow));
+
+                    // Almacenar las posiciones ocupadas por este barco
+                    List<int[]> positions = new ArrayList<>();
+                    for (int row = startRow; row < startRow + rows; row++) {
+                        for (int col = startCol; col < startCol + cols; col++) {
+                            positions.add(new int[] { col, row });
+                        }
                     }
-                }
-                occupiedPositions.put(selectedObject, positions);
+                    occupiedPositions.put(selectedObject, positions);
 
-                // Imprimir todas las celdas que el barco ocupa
-                System.out.println("Celdas ocupadas por el barco:");
-                for (int[] pos : positions) {
-                    System.out.println("Celda: (" + pos[0] + ", " + pos[1] + ")");
+                    // Imprimir todas las celdas que el barco ocupa
+                    System.out.println("Celdas ocupadas por el barco:");
+                    for (int[] pos : positions) {
+                        System.out.println("Celda: (" + pos[0] + ", " + pos[1] + ")");
+                    }
+                } else {
+                    obj.put("isVertical", true); // Asegúrate de que se dibuje verticalmente
+                    occupiedPositions.remove(selectedObject); // Borrar posiciones ocupadas
+                    double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[] { 200, 200 }); // Posición
+                                                                                                                  // por
+                                                                                                                  // defecto
+                    obj.put("x", newPosition[0]);
+                    obj.put("y", newPosition[1]);
+                    System.out.println(
+                            "El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a ("
+                                    + newPosition[0] + ", " + newPosition[1] + ").");
                 }
             } else {
                 obj.put("isVertical", true); // Asegúrate de que se dibuje verticalmente
                 occupiedPositions.remove(selectedObject); // Borrar posiciones ocupadas
-                double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[]{200, 200}); // Posición por defecto
+                double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[] { 200, 200 }); // Posición
+                                                                                                              // por
+                                                                                                              // defecto
                 obj.put("x", newPosition[0]);
                 obj.put("y", newPosition[1]);
-                System.out.println("El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a (" + newPosition[0] + ", " + newPosition[1] + ").");
+                System.out.println(
+                        "El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a ("
+                                + newPosition[0] + ", " + newPosition[1] + ").");
             }
-        } else {
-            obj.put("isVertical", true); // Asegúrate de que se dibuje verticalmente
-            occupiedPositions.remove(selectedObject); // Borrar posiciones ocupadas
-            double[] newPosition = boatPositions.getOrDefault(selectedObject, new double[]{200, 200}); // Posición por defecto
-            obj.put("x", newPosition[0]);
-            obj.put("y", newPosition[1]);
-            System.out.println("El barco " + selectedObject + " no se puede colocar en esa posición y ha sido movido a (" + newPosition[0] + ", " + newPosition[1] + ").");
-        }
 
-        // Resetear selección y arrastre
-        mouseDragging = false;
-        selectedObject = "";
+            // Resetear selección y arrastre
+            mouseDragging = false;
+            selectedObject = "";
         }
     }
-    
+
     private boolean checkCollision(int startCol, int startRow, int cols, int rows, boolean isVertical) {
 
         System.out.println(occupiedPositions);
@@ -263,10 +275,10 @@ public class ControllerPlay implements Initializable {
             if (objectId.equals(selectedObject)) {
                 continue; // Ignorar el barco actualmente seleccionado
             }
-    
+
             List<int[]> positions = occupiedPositions.get(objectId);
             System.out.println("Barco " + objectId + " ocupa las siguientes posiciones:");
-    
+
             // Imprimir las posiciones ocupadas
             for (int[] pos : positions) {
                 int objCol = pos[0];
@@ -280,7 +292,6 @@ public class ControllerPlay implements Initializable {
             int checkCol = 0;
             int checkRow = 0;
 
-    
             // Comprobar todas las celdas que ocupará el nuevo barco
             for (int colOffset = 0; colOffset < cols; colOffset++) {
                 for (int rowOffset = 0; rowOffset < rows; rowOffset++) {
@@ -297,18 +308,18 @@ public class ControllerPlay implements Initializable {
                         checkCol = checkCol + intVPlus;
                         intVPlus++;
                     }
-    
+
                     // Imprimir la posición del nuevo barco que se está comparando
                     System.out.printf("Comparando posición del nuevo barco: (%d, %d)%n", checkCol, checkRow);
-    
+
                     // Comparar con cada posición ocupada por otros barcos
                     for (int[] pos : positions) {
                         int objCol = pos[0];
                         int objRow = pos[1];
-    
+
                         // Imprimir cada comparación con las posiciones ocupadas
                         System.out.printf("Comparando con posición ocupada: (%d, %d)%n", objCol, objRow);
-    
+
                         // Verificar colisión
                         if (isVertical) {
                             // Comprobar si hay colisión horizontal
@@ -327,7 +338,7 @@ public class ControllerPlay implements Initializable {
         }
         return false; // No hay colisión
     }
-    
+
     public void setPlayersMousePositions(JSONObject positions) {
         clientMousePositions.clear();
         for (String clientId : positions.keySet()) {
@@ -348,25 +359,26 @@ public class ControllerPlay implements Initializable {
         return selectableObjects;
     }
 
-    public Boolean isPositionInsideObject(double positionX, double positionY, int objX, int objY, int cols, int rows, JSONObject obj) {
+    public Boolean isPositionInsideObject(double positionX, double positionY, int objX, int objY, int cols, int rows,
+            JSONObject obj) {
         double cellSize = grid.getCellSize();
         boolean isVertical = obj.optBoolean("isVertical", true); // Obtener la orientación del objeto
         double objectWidth = isVertical ? cols * cellSize : rows * cellSize; // Ajustar el ancho según la orientación
         double objectHeight = isVertical ? rows * cellSize : cols * cellSize; // Ajustar la altura según la orientación
-    
+
         double objectRightX = objX + objectWidth;
         double objectBottomY = objY + objectHeight;
-    
+
         return positionX >= objX && positionX < objectRightX &&
-               positionY >= objY && positionY < objectBottomY;
+                positionY >= objY && positionY < objectBottomY;
     }
-    
-    
 
     // Run game (and animations)
     private void run(double fps) {
 
-        if (animationTimer.fps < 1) { return; }
+        if (animationTimer.fps < 1) {
+            return;
+        }
 
         // Update objects and animations here
     }
@@ -374,34 +386,33 @@ public class ControllerPlay implements Initializable {
     // Draw game to canvas
     public void draw() {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // Limpia el canvas
-    
+
         // Dibuja la rejilla
         drawGrid();
-    
+
         // Dibuja los objetos seleccionables
         for (String objectId : selectableObjects.keySet()) {
             JSONObject selectableObject = selectableObjects.get(objectId);
             drawSelectableObject(objectId, selectableObject);
         }
-    
+
         // Dibuja FPS si es necesario
         if (showFPS) {
             animationTimer.drawFPS(gc);
         }
     }
-    
 
     public void drawGrid() {
         gc.setStroke(Color.BLACK);
-    
+
         for (int row = 0; row < grid.getRows(); row++) {
             for (int col = 0; col < grid.getCols(); col++) {
                 double cellSize = grid.getCellSize();
                 double x = grid.getStartX() + col * cellSize;
                 double y = grid.getStartY() + row * cellSize;
-    
+
                 gc.strokeRect(x, y, cellSize, cellSize);
-    
+
                 // Dibuja las letras de las columnas y los números de las filas
                 if (row == 0) {
                     String colLetter = String.valueOf((char) ('A' + col));
@@ -409,7 +420,7 @@ public class ControllerPlay implements Initializable {
                     gc.setFont(javafx.scene.text.Font.font(12));
                     gc.fillText(colLetter, x + cellSize / 2 - 5, y - 5);
                 }
-    
+
                 if (col == 0) {
                     String rowNumber = String.valueOf(row + 1);
                     gc.setFill(Color.BLACK);
@@ -419,16 +430,15 @@ public class ControllerPlay implements Initializable {
             }
         }
     }
-    
 
     public void drawSelectableObject(String objectId, JSONObject obj) {
         double cellSize = grid.getCellSize();
-    
+
         int x = obj.getInt("x");
         int y = obj.getInt("y");
         int cols = obj.getInt("cols");
         int rows = obj.getInt("rows");
-    
+
         // Verificar la orientación
         boolean isVertical = obj.optBoolean("isVertical", true);
         if (!isVertical) {
@@ -437,17 +447,17 @@ public class ControllerPlay implements Initializable {
             cols = rows;
             rows = temp;
         }
-    
+
         double width = cols * cellSize;
         double height = rows * cellSize;
-    
+
         // Rotación del objeto
         int rotation = obj.optInt("rotation", 0); // Puedes omitir esto si no necesitas una rotación
         gc.save(); // Guarda el estado actual del contexto gráfico
         gc.translate(x + width / 2, y + height / 2); // Mueve el origen al centro del objeto
         gc.rotate(rotation); // Aplica la rotación si es necesaria
         gc.translate(-width / 2, -height / 2); // Mueve de nuevo el origen al ángulo original
-    
+
         // Seleccionar un color basado en el objectId
         Color color = switch (objectId.toLowerCase()) {
             case "red" -> Color.RED;
@@ -460,15 +470,31 @@ public class ControllerPlay implements Initializable {
         // Dibujar el rectángulo
         gc.setFill(color);
         gc.fillRect(0, 0, width, height);
-    
+
         // Dibujar el contorno
         gc.setStroke(Color.BLACK);
         gc.strokeRect(0, 0, width, height);
-    
+
+        // Cargar y dibujar la imagen
+        String imgPath = obj.getString("imgPath");
+        Image image = new Image(imgPath);
+
+        if (isVertical) {
+            // Rotar la imagen si el objeto es vertical
+            gc.save();
+            gc.translate(width / 2, height / 2);
+            gc.rotate(90);
+            gc.translate(-height / 2, -width / 2);
+            gc.drawImage(image, 0, 0, height, width);
+            gc.restore();
+        } else {
+            gc.drawImage(image, 0, 0, width, height);
+        }
+
         // Opcionalmente, agregar texto (por ejemplo, el objectId)
         gc.setFill(Color.BLACK);
         gc.fillText(objectId, 5, 15);
-    
+
         gc.restore(); // Restaura el contexto gráfico
     }
 
@@ -484,20 +510,23 @@ public class ControllerPlay implements Initializable {
         // Si todos los barcos tienen posiciones, todos los barcos están colocados
         return true;
     }
-    
 
-    public void playerReady(){
-        if(playingMatch){
+    public void playerReady() {
+        if (playingMatch) {
             playingMatch = false;
             buttonReady.setText("Ready");
             removeOverlay();
-            ControllerConnect.instance.sendMessage("{\"type\":\"playerReady\",\"socketId\":\"" + ControllerConnect.clienteWebSocket + "\",\"name\":\"" + ControllerConnect.nombre + "\",\"enemyName\":\"" + null + "\"}");
+            ControllerConnect.instance
+                    .sendMessage("{\"type\":\"playerReady\",\"socketId\":\"" + ControllerConnect.clienteWebSocket
+                            + "\",\"name\":\"" + ControllerConnect.nombre + "\",\"enemyName\":\"" + null + "\"}");
         } else {
             if (allShipsPlaced()) {
                 playingMatch = true;
                 buttonReady.setText("Not Ready");
                 createOverlay();
-                ControllerConnect.instance.sendMessage("{\"type\":\"playerReady\",\"socketId\":\"" + ControllerConnect.clienteWebSocket + "\",\"name\":\"" + ControllerConnect.nombre + "\",\"enemyName\":\"" + ControllerMatchmaking.enemyName + "\"}");   
+                ControllerConnect.instance.sendMessage("{\"type\":\"playerReady\",\"socketId\":\""
+                        + ControllerConnect.clienteWebSocket + "\",\"name\":\"" + ControllerConnect.nombre
+                        + "\",\"enemyName\":\"" + ControllerMatchmaking.enemyName + "\"}");
             } else {
                 System.out.println("Debes tener todos los barcos puestos");
             }
@@ -516,11 +545,11 @@ public class ControllerPlay implements Initializable {
 
     public JSONObject getAllShipsAsJSON() {
         JSONObject allShipsJSON = new JSONObject();
-        
+
         for (String objectId : selectableObjects.keySet()) {
             JSONObject shipInfo = new JSONObject();
             JSONObject obj = selectableObjects.get(objectId);
-            
+
             // Extrae y almacena los atributos relevantes del barco
             shipInfo.put("x", obj.getInt("x"));
             shipInfo.put("y", obj.getInt("y"));
