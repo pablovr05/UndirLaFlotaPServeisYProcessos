@@ -207,7 +207,6 @@ public class ControllerConnect implements Initializable {
                             });
                         } else if ("userTurn".equals(type)) {
                             System.out.println("ES TU TURNO");
-
                             new Thread(() -> {
                                 try {
                                     Thread.sleep(150);
@@ -219,7 +218,6 @@ public class ControllerConnect implements Initializable {
                             }).start();
 
                         } else if ("enemyTurn".equals(type)) {
-
                             new Thread(() -> {
                                 try {
                                     Thread.sleep(150);

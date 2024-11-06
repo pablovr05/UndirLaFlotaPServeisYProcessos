@@ -556,6 +556,7 @@ public class ControllerPlay implements Initializable {
             shipInfo.put("cols", obj.getInt("cols"));
             shipInfo.put("rows", obj.getInt("rows"));
             shipInfo.put("isVertical", obj.optBoolean("isVertical", true));
+            shipInfo.put("imgPath", obj.getString("imgPath"));
 
             // Extrae las posiciones ocupadas por el barco en la cuadrícula
             JSONArray occupiedCells = new JSONArray();

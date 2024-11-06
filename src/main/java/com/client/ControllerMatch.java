@@ -155,23 +155,6 @@ public class ControllerMatch implements Initializable {
         double mouseX = event.getX();
         double mouseY = event.getY();
 
-        /*
-         * selectedObject = "";
-         * 
-         * for (String objectId : selectableObjects.keySet()) {
-         * JSONObject obj = (JSONObject) selectableObjects.get(objectId);
-         * int objX = obj.getInt("x");
-         * int objY = obj.getInt("y");
-         * int cols = obj.getInt("cols");
-         * int rows = obj.getInt("rows");
-         * 
-         * if (isPositionInsideObject(mouseX, mouseY, objX, objY, cols, rows)) {
-         * selectedObject = objectId;
-         * //System.out.println("Barco " + selectedObject + " clickeado2");
-         * break;
-         * }
-         * }
-         */
     }
 
     private void onMouseDragged(MouseEvent event) {
@@ -295,10 +278,6 @@ public class ControllerMatch implements Initializable {
     public void drawSelectableObject(String objectId, JSONObject obj) {
 
         double cellSize = defenseGrid.getCellSize();
-        /*
-         * System.out.println("Object ID: " + objectId);
-         * System.out.println("Object Data: " + obj);
-         */
         double x, y;
 
         if (obj.has("col") && obj.has("row")) {
@@ -317,10 +296,12 @@ public class ControllerMatch implements Initializable {
         }
 
         // Get the size using "cols" and "rows" (with defaults if missing)
-        double width = obj.optInt("cols", 1) * cellSize - 6; // Reducir ancho por margen de 3 px a cada lado
-        double height = obj.optInt("rows", 1) * cellSize - 6; // Reducir altura por margen de 3 px a cada lado
+        double width = obj.optInt("cols", 1) * cellSize; // Reducir ancho por margen de 3 px a cada lado
+        double height = obj.optInt("rows", 1) * cellSize; // Reducir altura por margen de 3 px a cada lado
 
-        if (!obj.getBoolean("isVertical")) {
+        boolean isVertical = obj.getBoolean("isVertical");
+
+        if (!isVertical) {
             // Si es horizontal, intercambiar ancho y alto
             double temp = width;
             width = height;
@@ -342,29 +323,21 @@ public class ControllerMatch implements Initializable {
             }
         }
 
-        // // Cargar y dibujar la imagen
-        // String imgPath = obj.getString("imgPath");
-        // Image image = new Image(imgPath);
+        // Cargar y dibujar la imagen
+        String imgPath = obj.getString("imgPath");
+        Image image = new Image(imgPath);
 
-        // if (obj.getBoolean("isVertical")) {
-        // // Rotar la imagen si el objeto es vertical
-        // gcDefense.save();
-        // gcDefense.translate(width / 2, height / 2);
-        // gcDefense.rotate(90);
-        // gcDefense.translate(-height / 2, -width / 2);
-        // gcDefense.drawImage(image, 0, 0, height, width);
-        // gcDefense.restore();
-        // } else {
-        // gcDefense.drawImage(image, 0, 0, width, height);
-        // }
-
-        // Dibujar el rectángulo con esquinas redondeadas
-        gcDefense.setFill(color);
-        gcDefense.fillRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
-
-        // Dibujar el contorno
-        gcDefense.setStroke(Color.BLACK);
-        gcDefense.strokeRoundRect(x + 3, y + 3, width, height, 10, 10); // Ajustar posición para el margen de 3 px
+        if (isVertical) {
+            // Rotar la imagen si el objeto es vertical
+            gcDefense.save();
+            gcDefense.translate(x + width / 2, y + height / 2);
+            gcDefense.rotate(90);
+            gcDefense.translate(-height / 2, -width / 2);
+            gcDefense.drawImage(image, 0, 0, height, width);
+            gcDefense.restore();
+        } else {
+            gcDefense.drawImage(image, x, y, width, height);
+        }
     }
 
     private boolean isPositionInsideObject(double mouseX, double mouseY, int objX, int objY, int cols, int rows) {
@@ -512,36 +485,43 @@ public class ControllerMatch implements Initializable {
         Color color;
         for (String objectId : ControllerPlay.instance.getEnemyOccupiedPositions().keySet()) {
 
-            if (objectId.strip().equals("00")) {
-                rows = 2;
-                columns = 1;
-                x = 10;
-                y = 5;
-            } else if (objectId.strip().equals("01")) {
-                rows = 2;
-                columns = 1;
-                x = 10;
-                y = 25;
-            } else if (objectId.strip().equals("02")) {
-                rows = 3;
-                columns = 1;
-                x = 40;
-                y = 5;
-            } else if (objectId.strip().equals("03")) {
-                rows = 3;
-                columns = 1;
-                x = 40;
-                y = 25;
-            } else if (objectId.strip().equals("04")) {
-                rows = 4;
-                columns = 1;
-                x = 10;
-                y = 45;
-            } else if (objectId.strip().equals("05")) {
-                rows = 5;
-                columns = 1;
-                x = 10;
-                y = 65;
+            switch (objectId.strip()) {
+                case "00" -> {
+                    rows = 2;
+                    columns = 1;
+                    x = 10;
+                    y = 5;
+                }
+                case "01" -> {
+                    rows = 2;
+                    columns = 1;
+                    x = 10;
+                    y = 25;
+                }
+                case "02" -> {
+                    rows = 3;
+                    columns = 1;
+                    x = 40;
+                    y = 5;
+                }
+                case "03" -> {
+                    rows = 3;
+                    columns = 1;
+                    x = 40;
+                    y = 25;
+                }
+                case "04" -> {
+                    rows = 4;
+                    columns = 1;
+                    x = 10;
+                    y = 45;
+                }
+                case "05" -> {
+                    rows = 5;
+                    columns = 1;
+                    x = 10;
+                    y = 65;
+                }
             }
 
             color = checkColorShip(ControllerPlay.instance.getEnemyOccupiedPositions().get(objectId));
