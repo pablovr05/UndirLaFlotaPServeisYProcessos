@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -341,7 +342,21 @@ public class ControllerMatch implements Initializable {
             }
         }
 
-        // System.out.println("(" + x + "," + y + ")" + width + " " + height);
+        // // Cargar y dibujar la imagen
+        // String imgPath = obj.getString("imgPath");
+        // Image image = new Image(imgPath);
+
+        // if (obj.getBoolean("isVertical")) {
+        // // Rotar la imagen si el objeto es vertical
+        // gcDefense.save();
+        // gcDefense.translate(width / 2, height / 2);
+        // gcDefense.rotate(90);
+        // gcDefense.translate(-height / 2, -width / 2);
+        // gcDefense.drawImage(image, 0, 0, height, width);
+        // gcDefense.restore();
+        // } else {
+        // gcDefense.drawImage(image, 0, 0, width, height);
+        // }
 
         // Dibujar el rectángulo con esquinas redondeadas
         gcDefense.setFill(color);
